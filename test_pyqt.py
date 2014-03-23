@@ -9,3 +9,6 @@ widget.setWindowTitle('simple')
 widget.show()
 
 sys.exit(app.exec_())
+
+
+print('hello world')
