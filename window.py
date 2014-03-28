@@ -76,7 +76,7 @@ class Ui_MainWindow(object):
         MainWindow.setWindowIcon(QtGui.QIcon('Darth-Vader-icon.png'))
         self.dockWidget_3.setWidget(self.dockWidgetContents_3)
         MainWindow.addDockWidget(QtCore.Qt.DockWidgetArea(1), self.dockWidget_3)
-
+        #self.video = QtGui.Q
         self.retranslateUi(MainWindow)
         QtCore.QMetaObject.connectSlotsByName(MainWindow)
 

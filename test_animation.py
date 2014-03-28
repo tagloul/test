@@ -10,7 +10,6 @@ import this  # quit thinking about this module. too hard for you!!
 import networkx as nx
 import matplotlib.pyplot as plt
 import matplotlib.animation as animation
-import time
 
 # activate the interactive mode for matplotlib
 #plt.ion()
@@ -199,7 +198,7 @@ def animate(frame, mybars, widthHist):
     """perform animation step"""
     for i in range(len(mybars)):
         mybars[i].set_width(widthHist[i, frame])
-        time.sleep(0.15)
+        #time.sleep(0.15)
 
 
 def bar_plot(graph, node_num, fig):
@@ -217,7 +216,7 @@ def bar_plot(graph, node_num, fig):
     mybars = [PlotBars(bars[i]) for i in range(size)]
     plt.yticks(y_pos, nodes)
     plt.xlabel('Value')
-    plt.title('Packets in the data_stack of node_1')
+    plt.title('Packets in the data_stack of node_'+str(node_num))
     plt.xlim(0, size)
     plt.ylim(0, size)
     nodes_names = nx.get_node_attributes(graph, "name")
@@ -225,11 +224,11 @@ def bar_plot(graph, node_num, fig):
     width_hist = names_nodes[str(node_num)].packet_history
     print(width_hist)
 
-    ani = animation.FuncAnimation(fig, animate, len(width_hist[0, :]),\
-                                  fargs=(mybars, width_hist), interval=100,\
-                                  blit=False, repeat=False)
-    ani.save('node_1.mp4', writer='ffmpeg')
-    plt.show()
+    ani = animation.FuncAnimation(fig, animate, frames=len(width_hist[0, :]),
+                                  fargs=(mybars, width_hist),
+                                  interval=100, blit=False, repeat=False)
+    ani.save('node_'+str(node_num)+'.mp4', writer='ffmpeg')
+    #plt.show()
 
 def setup_sending(graph, iteration):
     """method which handles sending messages in the network,
@@ -309,19 +308,29 @@ def create_figure(graph):
     # activate the interactive mode
     # plt.ion()
     # choose adjusted size for the subplots
-    fig = plt.figure(figsize=(6, 8))
-
-    # print first the network graph
-    plt.subplot(211)
+#===============================================================================
+#     fig = plt.figure(figsize=(6, 8))
+# 
+#     # print first the network graph
+#     plt.subplot(311)
+#     print_graph(graph)
+# 
+#     # print the barplots
+#     plt.subplot(312)
+#     bar_plot(graph, 1, fig)
+# 
+#     plt.subplot(313)
+#     bar_plot(graph, 2, fig)
+#===============================================================================
     print_graph(graph)
-
-    # print the barplots
-    plt.subplot(212)
-    bar_plot(graph, 1, fig)
-
+    
+    size = len(graph.nodes())
+    for i in range(size):
+        fig = plt.figure()
+        bar_plot(graph, i+1, fig)
     #plt.show()
 
-ITERATION = 10
+ITERATION = 5
 
 
 def main():
