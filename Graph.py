@@ -78,6 +78,7 @@ def iteration_plots(graph):
     fig, axarr = plt.subplots(rows, cols, sharex='col', sharey='row')
     fig.text(0.5, 0.05, 'iteration', ha='center', va='center')
     fig.text(0.05, 0.5, 'neighbor', ha='center', va='center', rotation='vertical')
+    x_lim = len(graph.nodes()[0].packet_history[0])
     for row in range(rows):
         for col in range(cols):
             node_num = row * cols + col + 1
@@ -93,7 +94,7 @@ def iteration_plots(graph):
             axarr[row, col].set_yticks(y_pos)
             axarr[row, col].set_yticklabels(nodes)
             axarr[row, col].set_ylim(0, size)
-            axarr[row, col].set_xlim(0, size)
+            axarr[row, col].set_xlim(0, x_lim)
             axarr[row, col].barh(y_pos, x_values, 0.4, align='center')
 
     fig.savefig("iteration.png")

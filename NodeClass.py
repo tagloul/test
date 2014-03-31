@@ -44,7 +44,7 @@ class Node(object):
         """data_stack setter"""
         self._data_stack = data_list
 
-    def check_data(self, data):
+    def check_data_stack(self, data):
         """ checks if a package is known, returns a boolean"""
         assert type(data) == packet.Package
         #======================================================================
@@ -64,10 +64,9 @@ class Node(object):
             if data.seq_number == item.seq_number:
                 seq_check = 1
         if origin_check == 0 or seq_check == 0 or type_check == 0:
-            return True
-        else:
             return False
-
+        else:
+            return True
 
     def del_sending_buffer(self):
         """clear the sending_buffer list"""
@@ -81,23 +80,24 @@ class Node(object):
         """ pushes packages in its sending_buffer into the receive_buffer of
         its neighbours"""
         for item in self.sending_buffer:
-            # deepcopy guarantees everything is copied
-            neighbor.receive_buffer.append(copy.deepcopy(item))
-            neighbor.receive_buffer[-1].last_node = self
+            if neighbor != item.last_node:
+                # deepcopy guarantees everything is copied
+                neighbor.receive_buffer.append(copy.deepcopy(item))
+                neighbor.receive_buffer[-1].last_node = self
 
     def update_data(self, column):
         """core function, check all the data in the receive_buffer and if they
         are unknown pushes them into the data_stack and the sending_buffer"""
         for data in self.receive_buffer:
-            boolean = self.check_data(data)
-            if boolean == True:
+            boolean = self.check_data_stack(data)
+            if boolean == False:
                 self.data_stack.append(data)
                 data.add_to_path(self)
                 self.sending_buffer.append(data)
                 # the value is stored in the row = to the origin of the packet
                 row = data.origin - 1
                 self.packet_history[row, column:] = data.value
-            elif boolean == False:
+            elif boolean == True:
                 pass
 
     def init_1_data(self):

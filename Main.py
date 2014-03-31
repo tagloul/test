@@ -35,7 +35,6 @@ def setup_sending_flooding(graph, iteration):
             item.print_package()
         print(node.packet_history)
         print('\n')
-        print(node.packet_history)
     create_figure(graph)
 
 
@@ -45,35 +44,21 @@ def setup_sending_SBA(graph, iteration):
     for node in graph.nodes():
         node.init_1_data()
     for i in range(iteration):
-        print('ITERATION :', i)
-        print()
         for node in graph.nodes():
             node.update_packet_dict(i, graph)
-            #print('node_'+str(node.ID+1))
-            #for packet in node.receive_buffer:
-            #    node.check_receive_buffer(packet, i, graph)
+
+        for node in graph.nodes():
             for neigh in graph.neighbors_iter(node):
                 node.send_to_neighbor(neigh)
+
         for node in graph.nodes():
-            print('node_'+str(node.ID+1))
             for packet in node.receive_buffer:
                 node.check_receive_buffer(packet, i, graph)
         # before updating the sending_buffer delete already sent data
         # after update del receive_buffer not to check already known data twice
         for node in graph.nodes():
-            print('node_'+str(node.ID+1))
-            print(node.packet_dict)
-            print('data_stack')
-            for item in node.data_stack:
-                item.print_package()
-            print('sending_buffer')
-            for item in node.sending_buffer:
-                item.print_package()
             node.del_sending_buffer()
             node.update_data(i + 1)
-            print('receive_buffer')
-            for item in node.receive_buffer:
-                item.print_package()
             node.del_receive_buffer()
     for node in graph.nodes():
         print('node_'+str(node.ID+1))
@@ -125,7 +110,7 @@ def create_figure(graph):
         Graph.bar_plot(graph, i + 1, fig)
 
 
-ITERATION = 5
+ITERATION = 10
 
 
 def main():
