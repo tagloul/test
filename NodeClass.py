@@ -47,6 +47,12 @@ class Node(object):
     def check_data(self, data):
         """ checks if a package is known, returns a boolean"""
         assert type(data) == packet.Package
+        #======================================================================
+        # bool_data = data in self.data_stack
+        # return bool_data
+        #----------------------------------------------------------------------
+        # this does not work..
+        #======================================================================
         origin_check = 0
         seq_check = 0
         type_check = 0
@@ -62,6 +68,7 @@ class Node(object):
         else:
             return False
 
+
     def del_sending_buffer(self):
         """clear the sending_buffer list"""
         self.sending_buffer = []
@@ -70,12 +77,13 @@ class Node(object):
         """"same as last function only this time for the receive_buffer"""
         self.receive_buffer = []
 
-    def send_to_neighbour(self, neighbour):
+    def send_to_neighbor(self, neighbor):
         """ pushes packages in its sending_buffer into the receive_buffer of
         its neighbours"""
         for item in self.sending_buffer:
             # deepcopy guarantees everything is copied
-            neighbour.receive_buffer.append(copy.deepcopy(item))
+            neighbor.receive_buffer.append(copy.deepcopy(item))
+            neighbor.receive_buffer[-1].last_node = self
 
     def update_data(self, column):
         """core function, check all the data in the receive_buffer and if they
@@ -88,7 +96,6 @@ class Node(object):
                 self.sending_buffer.append(data)
                 # the value is stored in the row = to the origin of the packet
                 row = data.origin - 1
-                print(row, column, "row and column")
                 self.packet_history[row, column:] = data.value
             elif boolean == False:
                 pass
@@ -96,7 +103,7 @@ class Node(object):
     def init_1_data(self):
         """ creates one package of type height and appends it to
         the data_stack and sending_buffer"""
-        new_package = packet.Package(self.ID + 1, 1, self.ID, "height")
+        new_package = packet.Package(self.ID + 1, 1, self.ID, "height", self)
         new_package.add_to_path(self)
         self.data_stack.append(new_package)
         self.sending_buffer.append(new_package)

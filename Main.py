@@ -7,10 +7,11 @@ import networkx as nx
 import numpy as np
 import matplotlib.pyplot as plt
 import Graph
-import Node as nde
+import NodeClass as nde
+import SBAClass as sbac
 
 
-def setup_sending(graph, iteration):
+def setup_sending_flooding(graph, iteration):
     """method which handles sending messages in the network,
     only call it once for sending sweet packages in a network"""
     for node in graph.nodes():
@@ -20,13 +21,12 @@ def setup_sending(graph, iteration):
     for i in range(iteration):
         for node in graph.nodes():
             for neigh in graph.neighbors_iter(node):
-                node.send_to_neighbour(neigh)
+                node.send_to_neighbor(neigh)
         # before updating the sending_buffer delete already sent data
         # after update del receive_buffer not to check already known data twice
         for node in graph.nodes():
             node.del_sending_buffer()
             node.update_data(i + 1)
-            print('check')
             node.del_receive_buffer()
         print(i + 1, "th step")
         Graph.print_all_data_stacks(graph)
@@ -35,10 +35,53 @@ def setup_sending(graph, iteration):
             item.print_package()
         print(node.packet_history)
         print('\n')
-    #print_graph(graph)
-    #bar_plot(graph, 1)
+        print(node.packet_history)
     create_figure(graph)
-    #raw_input('Press enter to continue')
+
+
+def setup_sending_SBA(graph, iteration):
+    """"performs the sending process for nodes with the
+    scalable broadcast algorithm"""
+    for node in graph.nodes():
+        node.init_1_data()
+    for i in range(iteration):
+        print('ITERATION :', i)
+        print()
+        for node in graph.nodes():
+            node.update_packet_dict(i, graph)
+            #print('node_'+str(node.ID+1))
+            #for packet in node.receive_buffer:
+            #    node.check_receive_buffer(packet, i, graph)
+            for neigh in graph.neighbors_iter(node):
+                node.send_to_neighbor(neigh)
+        for node in graph.nodes():
+            print('node_'+str(node.ID+1))
+            for packet in node.receive_buffer:
+                node.check_receive_buffer(packet, i, graph)
+        # before updating the sending_buffer delete already sent data
+        # after update del receive_buffer not to check already known data twice
+        for node in graph.nodes():
+            print('node_'+str(node.ID+1))
+            print(node.packet_dict)
+            print('data_stack')
+            for item in node.data_stack:
+                item.print_package()
+            print('sending_buffer')
+            for item in node.sending_buffer:
+                item.print_package()
+            node.del_sending_buffer()
+            node.update_data(i + 1)
+            print('receive_buffer')
+            for item in node.receive_buffer:
+                item.print_package()
+            node.del_receive_buffer()
+    for node in graph.nodes():
+        print('node_'+str(node.ID+1))
+        for item in node.data_stack:
+            item.print_package()
+        print(node.packet_history)
+        print('\n')
+    create_figure(graph)
 
 
 def setup_graph(laplacian, iteration):
@@ -49,6 +92,7 @@ def setup_graph(laplacian, iteration):
     size = len(laplacian[0, :])
     my_graph = nx.Graph()
     for i in range(size):
+        #my_graph.add_node(sbac.SBA(size, iteration, my_graph), name=str(i + 1))
         my_graph.add_node(nde.Node(size, iteration), name=str(i + 1))
     print(my_graph.nodes())
     # stores the nodes and their name attributes in a dictionary
@@ -71,26 +115,10 @@ def setup_graph(laplacian, iteration):
 
 def create_figure(graph):
     """print the two graphs in one window"""
-    # activate the interactive mode
-    # plt.ion()
-    # choose adjusted size for the subplots
-#==============================================================================
-#     fig = plt.figure(figsize=(6, 8))
-#
-#     # print first the network graph
-#     plt.subplot(311)
-#     print_graph(graph)
-#
-#     # print the barplots
-#     plt.subplot(312)
-#     bar_plot(graph, 1, fig)
-#
-#     plt.subplot(313)
-#     bar_plot(graph, 2, fig)
-#==============================================================================
     Graph.print_graph(graph)
     Graph.iteration_plots(graph)
 
+    # creates all the animated plots for the nodes
     size = len(graph.nodes())
     for i in range(size):
         fig = plt.figure()
@@ -109,7 +137,7 @@ def main():
                              [-1, -1,  0, -1,  3,  0],
                              [ 0,  0,  0, -1,  0,  1]])
     my_graph = setup_graph(graph_matrix, ITERATION)
-    setup_sending(my_graph, 4)
+    setup_sending_flooding(my_graph, ITERATION)
 
 
 if __name__ == '__main__':

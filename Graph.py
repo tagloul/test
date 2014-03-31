@@ -3,7 +3,7 @@
 # so far you will find a part for the animated barplots,
 # a plotted graph topology
 #==============================================================================
-
+# TODO find an appropriate way to save the animated plots
 
 import matplotlib.pyplot as plt
 import numpy as np
@@ -60,8 +60,10 @@ def bar_plot(graph, node_num, fig):
 
     ani = animation.FuncAnimation(fig, animate, len(width_hist[0, :]),
                                   fargs=(mybars, width_hist),
-                                  interval=100, blit=False, repeat=False)
-    ani.save('node_' + str(node_num) + '.mp4', writer='ffmpeg')
+                                  interval=2000, blit=False, repeat=False)
+    ani.save('node_' + str(node_num) + '.mp4',
+             extra_args=['-vcodec', 'libx264'])
+    # plt.show()
 
 
 def iteration_plots(graph):
@@ -74,8 +76,8 @@ def iteration_plots(graph):
     names_nodes = dict(zip(nodes_names.values(), nodes_names.keys()))
 
     fig, axarr = plt.subplots(rows, cols, sharex='col', sharey='row')
-    fig.text(0.5, 0.04, 'iteration', ha='center', va='center')
-    fig.text(0.06, 0.5, 'neighbor', ha='center', va='center', rotation='vertical')
+    fig.text(0.5, 0.05, 'iteration', ha='center', va='center')
+    fig.text(0.05, 0.5, 'neighbor', ha='center', va='center', rotation='vertical')
     for row in range(rows):
         for col in range(cols):
             node_num = row * cols + col + 1
