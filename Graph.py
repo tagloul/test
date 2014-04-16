@@ -12,8 +12,6 @@ import networkx as nx
 import math
 
 
-
-
 class PlotBars(object):
     """a plotbar object stands for a node to be plotted"""
     def __init__(self, bars):
@@ -68,7 +66,7 @@ def bar_plot(graph, node_num, fig):
 
 def iteration_plots(graph):
     size = len(graph.nodes())
-    rows = math.ceil(size / 2.)
+    rows = int(math.ceil(size / 2.))
     cols = 2
     nodes = [str(i + 1) for i in range(size)]
     y_pos = [i + 0.5 for i in range(size)]
@@ -102,6 +100,7 @@ def iteration_plots(graph):
 
 def print_graph(graph):
     """ prints the graph"""
+    fig = plt.figure()
     # stores the nodes and their name attributes in a dictionary
     nodes_names = nx.get_node_attributes(graph, "name")
     pos = nx.spring_layout(graph)
@@ -111,7 +110,7 @@ def print_graph(graph):
     # draw the label with the nodes_names containing the name attribute
     nx.draw_networkx_labels(graph, pos, nodes_names)
     plt.title("graph topology")
-    plt.savefig("graph.png")
+    fig.savefig("graph.png")
 
 
 def print_all_data_stacks(graph):

@@ -8,14 +8,14 @@ import numpy as np
 import copy
 import random
 import this  # quit thinking about this module. too hard for you!!
-import Package as packet
+import Package as pac
 
 
 class Node(object):
     """cool class containing stuff related to nodes"""
     obj_counter = 0  # in order to initiate the node.id
 
-    def __init__(self, size, iteration):
+    def __init__(self, size, iteration, graph):
         self._ID = self.__class__.obj_counter
         self._data_stack = []
         self.receive_buffer = []  # package list for incoming data
@@ -23,6 +23,10 @@ class Node(object):
         self.__class__.obj_counter += 1
         self._sent = 0
         self.packet_history = np.zeros((size, iteration))
+        self.flag = ""
+        self.packet_dict = {}
+        self.cover_dict = {}
+        self.two_hop_dict = {}
 
     def get_ID(self):
         """id getter"""
@@ -45,8 +49,9 @@ class Node(object):
         self._data_stack = data_list
 
     def check_data_stack(self, data):
-        """ checks if a package is known, returns a boolean"""
-        assert type(data) == packet.Package
+        """ checks if a package is known, returns a boolean
+        if not known return False"""
+        assert type(data) == pac.Package
         #======================================================================
         # bool_data = data in self.data_stack
         # return bool_data
@@ -73,7 +78,7 @@ class Node(object):
         self.sending_buffer = []
 
     def del_receive_buffer(self):
-        """"same as last function only this time for the receive_buffer"""
+        """same as last function only this time for the receive_buffer"""
         self.receive_buffer = []
 
     def send_to_neighbor(self, neighbor):
@@ -91,9 +96,10 @@ class Node(object):
         for data in self.receive_buffer:
             boolean = self.check_data_stack(data)
             if boolean == False:
-                self.data_stack.append(data)
                 data.add_to_path(self)
-                self.sending_buffer.append(data)
+                self.data_stack.append(data)
+                if self.flag != "SBA":
+                    self.sending_buffer.append(data)
                 # the value is stored in the row = to the origin of the packet
                 row = data.origin - 1
                 self.packet_history[row, column:] = data.value
@@ -103,7 +109,7 @@ class Node(object):
     def init_1_data(self):
         """ creates one package of type height and appends it to
         the data_stack and sending_buffer"""
-        new_package = packet.Package(self.ID + 1, 1, self.ID, "height", self)
+        new_package = pac.Package(self.ID + 1, 1, self.ID, "height", self)
         new_package.add_to_path(self)
         self.data_stack.append(new_package)
         self.sending_buffer.append(new_package)
@@ -124,7 +130,7 @@ class Node(object):
                     if item.type == "height" and item.origin == self.ID:
                         if item.seq_number > max_seq:
                             max_seq = item.seq_number
-                new_package = packet.Package(data, max_seq + 1, self.ID, "height")
+                new_package = pac.Package(data, max_seq + 1, self.ID, "height")
                 new_package.add_to_path(self)
             elif type_rand == 2:
                 max_seq = 0
@@ -132,7 +138,7 @@ class Node(object):
                     if item.type == "angles" and item.origin == self.ID:
                         if item.seq_number > max_seq:
                             max_seq = item.seq_number
-                new_package = packet.Package(data, max_seq + 1, self.ID, "angles")
+                new_package = pac.Package(data, max_seq + 1, self.ID, "angles")
                 new_package.add_to_path(self)
             elif type_rand == 3:
                 max_seq = 0
@@ -140,7 +146,7 @@ class Node(object):
                     if item.type == "velocity" and item.origin == self.ID:
                         if item.seq_number > max_seq:
                             max_seq = item.seq_number
-                new_package = packet.Package(data, max_seq + 1, self.ID, "velocity")
+                new_package = pac.Package(data, max_seq + 1, self.ID, "velocity")
                 new_package.add_to_path(self)
             self.data_stack.append(new_package)
             self.sending_buffer.append(new_package)

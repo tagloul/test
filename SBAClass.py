@@ -7,8 +7,8 @@ import NodeClass as nde
 
 
 class SBA(nde.Node):
-
-    def __init__(self, size, iteration, graph):
+    """Scalable Broadcast Algorithm"""
+    def __init__(self, size, iteration):
         super(SBA, self).__init__(size, iteration)
         # contains all messages currently processed by SBA
         self.packet_dict = {}
@@ -50,8 +50,8 @@ class SBA(nde.Node):
             return True
 
     def check_receive_buffer(self, m, actual_iter, graph):
-        bool_ds = self.check_data_stack(m)#m in self.data_stack
-        bool_pd = self.check_packet_dict(m)#m in self.packet_dict
+        bool_ds = self.check_data_stack(m)  # m in self.data_stack
+        bool_pd = self.check_packet_dict(m)  # m in self.packet_dict
         if bool_pd == True and bool_ds == True:
             self.update_cover_set(m, graph)
         elif bool_pd == False and bool_ds == False:
@@ -60,7 +60,8 @@ class SBA(nde.Node):
             if bool_neigh == True:
                 pass
             elif bool_neigh == False:
-                t = self.get_random_timer(graph)
+                t = 0
+                #t = self.get_random_timer(graph)
                 self.packet_dict[m] = (t, actual_iter)
                 self.update_cover_set(m, graph)
 

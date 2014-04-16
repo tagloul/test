@@ -1,4 +1,5 @@
 from __future__ import print_function
+import numpy as np
 #==============================================================================
 # This class is basically a data structure for the packet transmitted
 # in the network. Very simple class.
@@ -15,12 +16,15 @@ class Package(object):
         self.path = []
         self.type = data_type
         self.last_node = node
+        self.brg = []
 
     def add_to_path(self, node):
         """the name says it, add a node.id to the package path"""
         import NodeClass
         import SBAClass
-        assert type(node) == NodeClass.Node or type(node) == SBAClass.SBA
+        import AHBPClass
+        assert (type(node) == NodeClass.Node or type(node) == SBAClass.SBA
+                or type(node) == AHBPClass.AHBP)
         self.path.append(node.ID + 1)
 
     def print_package(self):
@@ -29,4 +33,18 @@ class Package(object):
         print("seq_num: {0}".format(self.seq_number), end=" ")
         print("origin: {0}".format(self.origin), end=" ")
         print("path: {0}".format(self.path), end=" ")
-        print("type: {0}".format(self.type))
+        print("type: {0}".format(self.type), end=" ")
+        print('BRG-Set: ', [node_id + 1 for node_id in self.brg])
+
+    def return_str(self):
+        content = ''
+        content += "value: {0} ".format(self.value)
+        content += "seq_num: {0} ".format(self.seq_number)
+        content += "origin: {0} ".format(self.origin)
+        content += "path: {0} ".format(self.path)
+        content += "type: {0} ".format(self.type)
+        if self.brg != []:
+            content += "BRG-Set: {0}".format(self.brg)
+        content += "\n"
+        # content = np.array(content).reshape(1,)
+        return content
