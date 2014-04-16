@@ -1,8 +1,7 @@
 #=============================================================================
 # this is the main file importing all other classes and executing all of it
 #=============================================================================
-# just to see if the new branch is working
-
+# hello world!
 import networkx as nx
 import numpy as np
 import matplotlib.pyplot as plt
