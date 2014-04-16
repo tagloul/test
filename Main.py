@@ -1,7 +1,7 @@
 #=============================================================================
 # this is the main file importing all other classes and executing all of it
 #=============================================================================
-
+# just to see if the new branch is working
 
 import networkx as nx
 import numpy as np
@@ -27,10 +27,8 @@ def write_lst_to_file(filename, node, iter_num, data_str):
         elif data_str == "sending_buffer":
             outfile.write("sending_buffer\n")
             for message in node.sending_buffer:
-                print 'check sending_buffer'
-                print message.return_str()
+                message.print_package()
                 outfile.write(message.return_str())
-                #message.print_package()
             outfile.write("\n")
             outfile.flush()
         elif data_str == "data_stack":
@@ -42,8 +40,6 @@ def write_lst_to_file(filename, node, iter_num, data_str):
             outfile.flush()
         # outfile.write("\n")
         outfile.close()
-        print 'check close'
-
 
 def setup_sending_flooding(graph, iteration):
     """method which handles sending messages in the network,
@@ -118,22 +114,22 @@ def setup_sending_AHBP(graph, iteration):
         for node in graph.nodes():
             with open("node_"+str(node.ID+1)+'.txt', 'a') as outfile:
                 outfile.write(str(i)+"th iteration\n")
-            print 'node_ID :', node.ID + 1, '\n'
-            print 'receive_buffer'
-            write_lst_to_file("node_"+str(node.ID+1), node, i, "receive_buffer")
-            node.check_receive_buffer(i)
-            node.del_receive_buffer()
-            for message in node.receive_buffer:
-                message.print_package()
-            print 'sending_buffer'
-            write_lst_to_file("node_"+str(node.ID+1), node, i, "sending_buffer")
-            print 'data_stack'
-            write_lst_to_file("node_"+str(node.ID+1), node, i, "data_stack")
+                print 'node_ID :', node.ID + 1, '\n'
+                print 'receive_buffer'
+                write_lst_to_file("node_"+str(node.ID+1), node, i, "receive_buffer")
+                node.check_receive_buffer(i)
+                node.del_receive_buffer()
+                for message in node.receive_buffer:
+                    message.print_package()
+                print 'sending_buffer'
+                write_lst_to_file("node_"+str(node.ID+1), node, i, "sending_buffer")
+                print 'data_stack'
+                write_lst_to_file("node_"+str(node.ID+1), node, i, "data_stack")
             # for all messages in the sending_buffer build the BRG-Set
-            for message in node.sending_buffer:
-                print 'new message :\n'
-                node.build_BRG(message)
-                message.print_package()
+                for message in node.sending_buffer:
+                    print 'new message :\n'
+                    node.build_BRG(message)
+                    message.print_package()
         # rebroadcast the messages in the sending_buffer to the neighbors
         for node in graph.nodes_iter():
             for neigh in node.two_hop_dict:
@@ -178,10 +174,9 @@ def setup_graph(laplacian, iter_num):
                 node_1 = names_nodes[str(i + 1)]
                 node_2 = names_nodes[str(j + 1)]
                 my_graph.add_edge(node_1, node_2)
-    #===========================================================================
-    # for node in my_graph.nodes():
-    #     node.build_2_hop(my_graph)
-    #===========================================================================
+    if my_graph.nodes()[0].flag == "AHBP":
+        for node in my_graph.nodes():
+            node.build_2_hop(my_graph)
 
     print(my_graph.edges())
     print('end of setup_graph')
@@ -230,7 +225,7 @@ def main():
     #===========================================================================
     
     my_graph = setup_graph(graph_matrix, ITERATION)
-    # setup_sending_flooding(my_graph, ITERATION)
+    setup_sending_AHBP(my_graph, ITERATION)
     # create_figure(my_graph)
     print type(my_graph.nodes()[0])
     print my_graph.nodes()[0].__class__.__base__.__subclasses__()[0].__dict__['dummy_method'](my_graph.nodes()[0])

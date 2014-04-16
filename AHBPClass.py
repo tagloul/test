@@ -7,6 +7,7 @@ class AHBP(nde.Node):
     def __init__(self, size, iteration, graph):
         super(AHBP, self).__init__(size, iteration, graph)
         self.two_hop_dict = {}
+        self.flag = "AHBP"
 
 
     def dummy_method(self):
