@@ -54,7 +54,6 @@ def bar_plot(graph, node_num, fig):
     nodes_names = nx.get_node_attributes(graph, "name")
     names_nodes = dict(zip(nodes_names.values(), nodes_names.keys()))
     width_hist = names_nodes[str(node_num)].packet_history
-    print(width_hist)
 
     ani = animation.FuncAnimation(fig, animate, len(width_hist[0, :]),
                                   fargs=(mybars, width_hist),

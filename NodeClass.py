@@ -14,7 +14,6 @@ import Package as pac
 class Node(object):
     """cool class containing stuff related to nodes"""
     obj_counter = 0  # in order to initiate the node.id
-
     def __init__(self, size, iteration, graph):
         self._ID = self.__class__.obj_counter
         self._data_stack = []
@@ -26,7 +25,10 @@ class Node(object):
         self.flag = ""
         self.packet_dict = {}
         self.cover_dict = {}
+        # both are the same, just use two different dict for now, cuz
+        # i want to test the hello-messages
         self.two_hop_dict = {}
+        self.neigh_dict = {}
 
     def get_ID(self):
         """id getter"""
@@ -90,7 +92,7 @@ class Node(object):
                 neighbor.receive_buffer.append(copy.deepcopy(item))
                 neighbor.receive_buffer[-1].last_node = self
 
-    def update_data(self, column):
+    def update_data(self, column, FLAG):
         """core function, check all the data in the receive_buffer and if they
         are unknown pushes them into the data_stack and the sending_buffer"""
         for data in self.receive_buffer:
@@ -98,7 +100,7 @@ class Node(object):
             if boolean == False:
                 data.add_to_path(self)
                 self.data_stack.append(data)
-                if self.flag != "SBA":
+                if FLAG != "SBA":
                     self.sending_buffer.append(data)
                 # the value is stored in the row = to the origin of the packet
                 row = data.origin - 1
