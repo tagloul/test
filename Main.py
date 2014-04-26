@@ -243,7 +243,7 @@ def main():
         if FLAG == "":
             print 'Application is now shutting down'
             break
-        if FLAG == "SBA":
+        elif FLAG == "SBA":
             setup_sending_SBA(my_graph, ITERATION, FLAG)
             print 'check SBA calculations'
         elif FLAG == "AHBP":
