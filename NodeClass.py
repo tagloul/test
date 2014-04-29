@@ -12,14 +12,13 @@ import Package as pac
 import threading
 
 
-# here insert the sending flow
-
-
-class Node(object, threading.Thread):
+class Node(object):
     """cool class containing stuff related to nodes"""
     obj_counter = 0  # in order to initiate the node.id
+    locker = threading.Lock()
+
     def __init__(self, size, iteration, graph):
-        threading.Thread.__init__(self)
+        # threading.Thread.__init__(self, name=self.__class__.obj_counter])
         self._ID = self.__class__.obj_counter
         self._data_stack = []
         self.receive_buffer = []  # package list for incoming data
@@ -38,6 +37,13 @@ class Node(object, threading.Thread):
         # i want to test the hello-messages
         self.two_hop_dict = {}
         self.neigh_dict = {}
+
+    # def run(self):
+    #     # sending operations of a node
+    #     self.init_1_data()
+    #     for neigh in graph.neighbors(self):
+    #         self.send_to_neighbor(neigh)
+    #     pass
 
     def get_ID(self):
         """id getter"""
@@ -101,12 +107,20 @@ class Node(object, threading.Thread):
                 neighbor.receive_buffer.append(copy.deepcopy(item))
                 neighbor.receive_buffer[-1].last_node = self
 
+    def send_one_message(self, message, neighbor):
+        """take one message and a neighbor as argument. Message will be sent to neighbor
+        and then deleted in the sending_list"""
+        if neighbor != message.last_node:
+            neighbor.receive_buffer.append(copy.deepcopy(message))
+            neighbor.receive_buffer[-1].last_node = self
+            self.sending_buffer.remove(message)
+
     def update_data(self, column, FLAG):
         """core function, check all the data in the receive_buffer and if they
         are unknown pushes them into the data_stack and the sending_buffer"""
         for data in self.receive_buffer:
             boolean = self.check_data_stack(data)
-            if boolean == False:
+            if not boolean:
                 data.add_to_path(self)
                 self.data_stack.append(data)
                 if FLAG != "SBA":
@@ -114,7 +128,7 @@ class Node(object, threading.Thread):
                 # the value is stored in the row = to the origin of the packet
                 row = data.origin - 1
                 self.packet_history[row, column:] = data.value
-            elif boolean == True:
+            elif boolean:
                 pass
 
     def init_1_data(self):

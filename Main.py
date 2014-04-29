@@ -143,7 +143,7 @@ def setup_graph(laplacian, iter_num):
     size = len(laplacian[0, :])
     my_graph = nx.Graph()
     for i in range(size):
-        my_graph.add_node(nde.Node(size, iter_num, my_graph), name=str(i + 1))
+        my_graph.add_node(nde.Node(size, iter_num), name=str(i + 1))
         #my_graph.add_node(nde.Node(size, iteration), name=str(i + 1))
     print(my_graph.nodes())
     # stores the nodes and their name attributes in a dictionary

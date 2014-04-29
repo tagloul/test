@@ -46,8 +46,7 @@ while True:
     input = long(raw_input("number: "))
     if input < 1:
         break
-
-    thread = PrimeNumber(input)
+    thread = PrimeNumber(input, hello)
     threads += [thread]
     thread.start()
 
