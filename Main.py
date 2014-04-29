@@ -165,12 +165,13 @@ def setup_graph(laplacian, iter_num):
     return my_graph
 
 
-def send_HELLO(node, graph):
-    my_hello = pkt.Hello(node)
-    for neighbor in node.neigh_dict:
-        my_hello.neigh_lst.append(neighbor)
-    for neigh in graph.neighbors(node):
-        neigh.receive_buffer.append(my_hello)
+# def send_HELLO(node, graph):
+#     my_hello = pkt.Hello(node)
+#     for neighbor in node.neigh_dict:
+#         my_hello.neigh_lst.append(neighbor)
+#     for neigh in graph.neighbors(node):
+#         neigh.receive_buffer.append(my_hello)
+#         pass
 
 #===============================================================================
 # def check_one_hop_edges(node):

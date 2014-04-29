@@ -15,11 +15,10 @@ import threading
 # here insert the sending flow
 
 
-class Node(object, threading.Thread):
+class Node(object):
     """cool class containing stuff related to nodes"""
     obj_counter = 0  # in order to initiate the node.id
-    def __init__(self, size)#, iteration, graph):
-        #threading.Thread.__init__(self)
+    def __init__(self, size):
         self._ID = self.__class__.obj_counter
         self._data_stack = []
         self.receive_buffer = []  # package list for incoming data
