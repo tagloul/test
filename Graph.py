@@ -54,13 +54,12 @@ def bar_plot(graph, node_num, fig):
     nodes_names = nx.get_node_attributes(graph, "name")
     names_nodes = dict(zip(nodes_names.values(), nodes_names.keys()))
     width_hist = names_nodes[str(node_num)].packet_history
-    print(width_hist)
 
-    ani = animation.FuncAnimation(fig, animate, len(width_hist[0, :]),
+    ani = animation.FuncAnimation(fig, animate, len(width_hist[:, 0]),
                                   fargs=(mybars, width_hist),
                                   interval=2000, blit=False, repeat=False)
-    ani.save('node_' + str(node_num) + '.mp4',
-             extra_args=['-vcodec', 'libx264'])
+    ani.save('node_' + str(node_num) + '.mp4', codec = ffmpeg)
+             # extra_args=['-vcodec', 'libx264'])
     # plt.show()
 
 

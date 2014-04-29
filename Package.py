@@ -21,10 +21,7 @@ class Package(object):
     def add_to_path(self, node):
         """the name says it, add a node.id to the package path"""
         import NodeClass
-        import SBAClass
-        import AHBPClass
-        assert (type(node) == NodeClass.Node or type(node) == SBAClass.SBA
-                or type(node) == AHBPClass.AHBP)
+        assert (type(node) == NodeClass.Node)
         self.path.append(node.ID + 1)
 
     def print_package(self):
@@ -48,3 +45,20 @@ class Package(object):
         content += "\n"
         # content = np.array(content).reshape(1,)
         return content
+
+
+#===============================================================================
+# class Hello(object):
+#     """hello messages"""
+#     def __init__(self, sender):
+#         self.sender = sender
+#         self.neigh_lst = []
+# 
+#     def set_sender(self, sender):
+#         self.sender = sender
+# 
+#     def add_neigh(self, neighbor):
+#         if neighbor not in self.neigh_lst:
+#             self.neigh_lst.append(neighbor)
+#     
+#===============================================================================
