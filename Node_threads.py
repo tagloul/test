@@ -35,8 +35,38 @@ class Node_thread(object, threading, flag):
 
     def run(self):
         """"this will then execute the sending process for a node""""
+        # initiate this node with data
         self.node.init_1_data()
         # for neigh in self.graph.neighbors(self.node):
         #     self.node.send_to_neighbor(neigh)
+        # this block will forward messages in the sending_buffer to its neigh
+        #Node_thread.locker.acquire()
         for message in self.node.sending_buffer:
-            pass
+            # not sure if I really need a locker here, prolly not
+            #Node_thread.locker.acquire()
+            for neigh in self.graph.neighbors(self.node):
+                self.send_one_message(message, neigh)
+            self.node.sending_buffer.remove(message)
+        #Node_thread.locker.release()
+        # this block will handle incoming messages
+        # will need the locker since I append data
+        while len(self.node.receive_buffer) > 0:
+            for packet in self.node.receive_buffer:
+                self.check_message(packet)
+
+
+    def check_message(self, data):
+        bool_data = self.node.check_data_stack(data)
+        if not bool_data:
+            data.add_to_path(self.node)
+            self.node.data_stack.append(data)
+            self.node.sending_buffer.append(data)
+        self.node.receive_buffer.remove(data)
+
+class Read_thread(object, threading.Thread):
+    def __ini__(self, node, topo_graph):
+        threading.Thread.__init__(name='read'+str(node.ID))
+        self.node = node
+        self.graph = topo_graph
+
+    def run(self):

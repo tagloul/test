@@ -24,7 +24,7 @@ class Node(object):
         self.receive_buffer = []  # package list for incoming data
         self.sending_buffer = []  # list conaining the packages to be send
         self.__class__.obj_counter += 1
-        self._sent = 0
+        self.sender = False
         # matrix which stores the info when a node receive a packet
         self.packet_history = np.zeros((size, iteration))
         self.flag = ""
@@ -37,13 +37,6 @@ class Node(object):
         # i want to test the hello-messages
         self.two_hop_dict = {}
         self.neigh_dict = {}
-
-    # def run(self):
-    #     # sending operations of a node
-    #     self.init_1_data()
-    #     for neigh in graph.neighbors(self):
-    #         self.send_to_neighbor(neigh)
-    #     pass
 
     def get_ID(self):
         """id getter"""
@@ -175,6 +168,18 @@ class Node(object):
                 new_package.add_to_path(self)
             self.data_stack.append(new_package)
             self.sending_buffer.append(new_package)
+
+    def check_rebroadcast(self, iteration):
+        """If the sending_list is not empty, set the sender Flag to true.
+        -> node rebroadcasts messages"""
+        # if sender already true no need to further processing
+        # of if iteration = 0, i.e don't consider initial
+        # broadcasting nodes -> node.init_1_data() method
+        if self.sender or iteration == 0:
+            return
+        # if list not empty set flag to true
+        if self.sending_buffer:
+            self.sender == True
 
     sent = property(get_sent, set_sent)
     ID = property(get_ID)

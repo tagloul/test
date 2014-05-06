@@ -9,6 +9,8 @@ import Graph
 import NodeClass as nde
 import SBAClass as sba
 import AHBPClass as ahbp
+import random
+
 import Package as pkt
 
 
@@ -52,6 +54,8 @@ def setup_sending_flooding(graph, iteration, FLAG):
     # its own sending_buffer to its neighbour's receive_buffer
     for i in range(iteration):
         for node in graph.nodes():
+            # check if node rebroadcasts any messages
+            node.check_rebroadcast(i)
             for neigh in graph.neighbors_iter(node):
                 node.send_to_neighbor(neigh)
         # before updating the sending_buffer delete already sent data
@@ -75,8 +79,11 @@ def setup_sending_SBA(graph, iteration, FLAG):
         for node in graph.nodes():
             sba.update_packet_dict(node, i, graph)
 
+
         # forward packet in the sending list to neighbors
         for node in graph.nodes():
+            # check if node rebroadcasts any messages
+            node.check_rebroadcsat(i)
             for neigh in graph.neighbors_iter(node):
                 node.send_to_neighbor(neigh)
 
@@ -130,6 +137,8 @@ def setup_sending_AHBP(graph, iteration):
 
         # rebroadcast the messages in the sending_buffer to the neighbors
         for node in graph.nodes_iter():
+            # check if node rebroadcasts any messages
+            node.check_rebroadcast(i)
             for neigh in node.two_hop_dict:
                 node.send_to_neighbor(neigh)
             node.del_sending_buffer()
@@ -143,7 +152,7 @@ def setup_graph(laplacian, iter_num):
     size = len(laplacian[0, :])
     my_graph = nx.Graph()
     for i in range(size):
-        my_graph.add_node(nde.Node(size, iter_num), name=str(i + 1))
+        my_graph.add_node(nde.Node(size, iter_num, my_graph), name=str(i + 1))
         #my_graph.add_node(nde.Node(size, iteration), name=str(i + 1))
     print(my_graph.nodes())
     # stores the nodes and their name attributes in a dictionary
@@ -165,12 +174,12 @@ def setup_graph(laplacian, iter_num):
     return my_graph
 
 
-def send_HELLO(node, graph):
-    my_hello = pkt.Hello(node)
-    for neighbor in node.neigh_dict:
-        my_hello.neigh_lst.append(neighbor)
-    for neigh in graph.neighbors(node):
-        neigh.receive_buffer.append(my_hello)
+# def send_HELLO(node, graph):
+#     my_hello = pkt.Hello(node)
+#     for neighbor in node.neigh_dict:
+#         my_hello.neigh_lst.append(neighbor)
+#     for neigh in graph.neighbors(node):
+#         neigh.receive_buffer.append(my_hello)
 
 #===============================================================================
 # def check_one_hop_edges(node):
@@ -200,40 +209,143 @@ def send_HELLO(node, graph):
 
 
 def create_figure(graph):
-    """TODO"""
+    """"""
     Graph.iteration_plots(graph)
 
-    # creates all the animated plots for the nodes
-    size = len(graph.nodes())
-    for i in range(size):
-        fig = plt.figure()
-        Graph.bar_plot(graph, i + 1, fig)
+    # # creates all the animated plots for the nodes
+    # size = len(graph.nodes())
+    # for i in range(size):
+    #     fig = plt.figure()
+    #     Graph.bar_plot(graph, i + 1, fig)
 
     print 'check plot generating'
+
+
+def set_sender_false(graph):
+    for node in graph.nodes_iter():
+        node.sender = False
+
+
+def get_num_sender(graph):
+    rebroadcaster = 0
+    for node in graph.nodes_iter():
+        if node.sender:
+            rebroadcaster += 1
+    return rebroadcaster
+
+
+def average_degree(graph):
+    av_deg = 0
+    for node in graph.nodes_iter():
+        av_deg += graph.degree(node)
+    av_deg = av_deg/float(len(graph))
+    return av_deg
+
+
+def random_graph(num_nodes):
+    graph_bool = False
+    # generate a graphically meaningful degree sequence
+    while not graph_bool:
+        degree_lst = [random.randint(1,6) for i in range(num_nodes)]
+        graph_bool = nx.is_graphical(degree_lst)
+        print degree_lst
+    gene_bool = False
+    # Use try here because sometimes an the graph can not be generated within 10 tries
+    # so try as long as it works
+    while not gene_bool:
+        try:
+            graph = nx.random_degree_sequence_graph(degree_lst)
+            gene_bool = True
+        finally:
+            pass
+    graph.remove_edges_from(graph.selfloop_edges())
+    return graph
+
+def sender_plot():
+    x_lst = [i for i in xrange(80)]
+    y_flood = []
+    y_ahbp = []
+    y_sba = []
+    for i in x_lst:
+        flood_rebroadcast = 0
+        ahbp_rebroadcast = 0
+        sba_rebroadcast = 0
+        # get the average of rebbroadcasting nodes over three different graph
+        # because the degree_lst may vary quite a lot
+        # TODO think of a way on how to take into account the average degree of graphs
+        for i in range(3):
+            # build random graph
+            rand_graph = random_graph(i)
+
+            # get values for flooding
+            setup_sending_flooding(rand_graph, i-1, 'flooding')
+            flood_rebroadcast += get_num_sender(rand_graph)
+
+            # set all the sender flags to false again
+            # so one can reuse the same graph
+            set_sender_false(rand_graph)
+
+            # get values for ahbp
+            setup_sending_AHBP(rand_graph, i-1)
+            ahbp_rebroadcast += get_num_sender(rand_graph)
+
+            set_sender_false(rand_graph)
+
+            setup_sending_SBA(rand_graph, i-1, 'SBA')
+            sba_rebroadcast += get_num_sender(rand_graph)
+            # since SBA has a random timer get some more samples for an accurate result
+            for i in range(2):
+                rand_graph = random_graph(i)
+                setup_sending_SBA(rand_graph, i-1, 'SBA')
+                sba_rebroadcast += get_num_sender(rand_graph)
+
+        y_flood.append(flood_rebroadcast/3.0)
+        y_ahbp.append(ahbp_rebroadcast/3.0)
+        y_sba.append(sba_rebroadcast/9.0)
+
+        fig, (ax1, ax2, ax3) = plt.subplots(3, sharex=True, sharey=True)
+        ax1.plot(x_lst, y_flood)
+        ax1.title('pure flooding')
+
+        ax2.plot(x_lst, y_ahbp)
+        ax2.title('ad-hoc broadcast protocol')
+
+        ax3.plot(x_lst, y_sba)
+        ax3.title('scalabe broadcast algorithm')
+
+        plt.show(fig)
+
+        fig.savefig('sender_plots.png')
+
 
 
 ITERATION = 10
 FLAG = ""
 HELLO_INTERVAL = 3
 ALLOWED_HELLO_LOSS = 1
+flood_lst = {}
+ahbp_lst = {}
+sba_lst = {}
 
 
 def main():
     """main function which performs the whole retransmission"""
-    # laplacian matrix -> has the information about the network-topology
-    graph_matrix = np.array([[ 3, -1,  0, -1, -1,  0,  0,  0,  0,  0,  0,  0,  0],
-                             [-1,  3, -1, -1,  0,  0,  0,  0,  0,  0,  0,  0,  0],
-                             [ 0, -1,  4, -1,  0,  0, -1, -1,  0,  0,  0,  0,  0],
-                             [-1, -1, -1,  6, -1, -1, -1,  0,  0,  0,  0,  0,  0],
-                             [-1,  0,  0, -1,  3, -1,  0,  0,  0,  0,  0,  0,  0],
-                             [ 0,  0,  0, -1, -1,  5, -1,  0,  0, -1, -1,  0,  0],
-                             [ 0,  0, -1, -1,  0, -1,  6, -1, -1, -1,  0,  0,  0],
-                             [ 0,  0, -1,  0,  0,  0, -1,  3, -1,  0,  0,  0,  0],
-                             [ 0,  0,  0,  0,  0,  0, -1, -1,  3, -1,  0,  0,  0],
-                             [ 0,  0,  0,  0,  0, -1, -1,  0, -1,  5, -1,  0, -1],
-                             [ 0,  0,  0,  0,  0, -1,  0,  0,  0, -1,  4, -1, -1],
-                             [ 0,  0,  0,  0,  0,  0,  0,  0,  0,  0, -1,  1,  0],
-                             [ 0,  0,  0,  0,  0,  0,  0,  0,  0, -1, -1,  0,  2]])
+    sender_plot()
+    # # laplacian matrix -> has the information about the network-topology
+    # graph_matrix = np.array([[ 3, -1,  0, -1, -1,  0,  0,  0,  0,  0,  0,  0,  0],
+    #                          [-1,  3, -1, -1,  0,  0,  0,  0,  0,  0,  0,  0,  0],
+    #                          [ 0, -1,  4, -1,  0,  0, -1, -1,  0,  0,  0,  0,  0],
+    #                          [-1, -1, -1,  6, -1, -1, -1,  0,  0,  0,  0,  0,  0],
+    #                          [-1,  0,  0, -1,  3, -1,  0,  0,  0,  0,  0,  0,  0],
+    #                          [ 0,  0,  0, -1, -1,  5, -1,  0,  0, -1, -1,  0,  0],
+    #                          [ 0,  0, -1, -1,  0, -1,  6, -1, -1, -1,  0,  0,  0],
+    #                          [ 0,  0, -1,  0,  0,  0, -1,  3, -1,  0,  0,  0,  0],
+    #                          [ 0,  0,  0,  0,  0,  0, -1, -1,  3, -1,  0,  0,  0],
+    #                          [ 0,  0,  0,  0,  0, -1, -1,  0, -1,  5, -1,  0, -1],
+    #                          [ 0,  0,  0,  0,  0, -1,  0,  0,  0, -1,  4, -1, -1],
+    #                          [ 0,  0,  0,  0,  0,  0,  0,  0,  0,  0, -1,  1,  0],
+    #                          [ 0,  0,  0,  0,  0,  0,  0,  0,  0, -1, -1,  0,  2]])
+
 
     #==========================================================================
     # graph_matrix = np.array([[ 2, -1,  0,  0, -1,  0],
@@ -244,29 +356,42 @@ def main():
     #                          [ 0,  0,  0, -1,  0,  1]])
     #==========================================================================
 
-    my_graph = setup_graph(graph_matrix, ITERATION)
-    while True:
-        print "Your options are as follows:\n\n"\
-          "flooding ->\tPure Flooding in the Network\n"\
-          "SBA ->\t\tScalable Broadcast Algorithm\n"\
-          "AHBP ->\t\tAd-Hoc Broadcast Protocol\n"
-        FLAG = raw_input("Enter your Flag. To quit press enter\n")
-        if FLAG == "":
-            print 'Application is now shutting down'
-            break
-        elif FLAG == "SBA":
-            setup_sending_SBA(my_graph, ITERATION, FLAG)
-            print 'check SBA calculations'
-        elif FLAG == "AHBP":
-            setup_sending_AHBP(my_graph, ITERATION)
-            print 'check AHBP calculations'
-        elif FLAG == "flooding":
-            setup_sending_flooding(my_graph, ITERATION, FLAG)
-            print 'check flooding calculations'
-        create_figure(my_graph)
-    #==========================================================================
-    # print type(my_graph.nodes()[0])
-    # print my_graph.nodes()[0].__class__.__base__.__subclasses__()[0].__dict__['dummy_method'](my_graph.nodes()[0])
-    #==========================================================================
+    # my_graph = setup_graph(graph_matrix, ITERATION)
+    # while True:
+    #     num_sender = 0
+    #     print "Your options are as follows:\n\n"\
+    #       "flooding ->\tPure Flooding in the Network\n"\
+    #       "SBA ->\t\tScalable Broadcast Algorithm\n"\
+    #       "AHBP ->\t\tAd-Hoc Broadcast Protocol\n"
+    #     FLAG = raw_input("Enter your Flag. To quit press enter\n")
+    #     if FLAG == "":
+    #         print 'Application is now shutting down'
+    #         break
+    #     elif FLAG == "SBA":
+    #         setup_sending_SBA(my_graph, ITERATION, FLAG)
+    #         for node in my_graph.nodes():
+    #             if node.sender == True:
+    #                 num_sender += 1
+    #         flood_lst[my_graph.number_of_nodes()] = num_sender
+    #         print 'check SBA calculations'
+    #     elif FLAG == "AHBP":
+    #         setup_sending_AHBP(my_graph, ITERATION)
+    #         for node in my_graph.nodes():
+    #             if node.sender == True:
+    #                 num_sender += 1
+    #         ahbp_lst[my_graph.number_of_nodes()] = num_sender
+    #         print 'check AHBP calculations'
+    #     elif FLAG == "flooding":
+    #         setup_sending_flooding(my_graph, ITERATION, FLAG)
+    #         for node in my_graph.nodes():
+    #             if node.sender == True:
+    #                 num_sender += 1
+    #         sba_lst[my_graph.number_of_nodes()] = num_sender
+    #         print 'check flooding calculations'
+    #     create_figure(my_graph)
+
+
+
+
 if __name__ == '__main__':
     main()

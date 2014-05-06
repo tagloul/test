@@ -10,6 +10,7 @@ import numpy as np
 import matplotlib.animation as animation
 import networkx as nx
 import math
+import random
 
 
 class PlotBars(object):
@@ -58,8 +59,7 @@ def bar_plot(graph, node_num, fig):
     ani = animation.FuncAnimation(fig, animate, len(width_hist[:, 0]),
                                   fargs=(mybars, width_hist),
                                   interval=2000, blit=False, repeat=False)
-    ani.save('node_' + str(node_num) + '.mp4', codec = ffmpeg)
-             # extra_args=['-vcodec', 'libx264'])
+    ani.save('node_' + str(node_num) + '.mp4', extra_args=['-vcodec', 'libx264'])
     # plt.show()
 
 
@@ -119,3 +119,21 @@ def print_all_data_stacks(graph):
         for item in node.data_stack:
             print(item.value)
         print('\n')
+
+def sender_plot(graph, sender_dict, flag):
+    fig = plt.figure()
+    x_lst = sender_dict.keys()
+    y_lst = sender_dict.values()
+    plt.plot(x_lst, y_lst, linestyle = '-')
+    plt.xlabel('number of nodes')
+    plt.ylabel('number of rebroadcasting nodes')
+    if flag == 'flooding':
+        plt.title('pure flooding')
+        fig.savefig('flooding.png')
+    elif flag == 'AHBP':
+        plt.title('ad-hoc broadcast protocol')
+        fig.savefig('Ad-Hoc_Broadcast_Protocol.png')
+    elif flag == 'SBA':
+        plt.title('scalable broadcast algorithm')
+        fig.savefig('Scalable_Broadcast_Algorithm.png')
+
