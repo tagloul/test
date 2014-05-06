@@ -12,19 +12,19 @@ import Package as pac
 import threading
 
 
-# here insert the sending flow
-
-
 class Node(object):
     """cool class containing stuff related to nodes"""
     obj_counter = 0  # in order to initiate the node.id
-    def __init__(self, size):
+    locker = threading.Lock()
+
+    def __init__(self, size, iteration, graph):
+        # threading.Thread.__init__(self, name=self.__class__.obj_counter])
         self._ID = self.__class__.obj_counter
         self._data_stack = []
         self.receive_buffer = []  # package list for incoming data
         self.sending_buffer = []  # list conaining the packages to be send
         self.__class__.obj_counter += 1
-        self._sent = 0
+        self.sender = False
         # matrix which stores the info when a node receive a packet
         self.packet_history = np.zeros((size, iteration))
         self.flag = ""
@@ -100,12 +100,20 @@ class Node(object):
                 neighbor.receive_buffer.append(copy.deepcopy(item))
                 neighbor.receive_buffer[-1].last_node = self
 
+    def send_one_message(self, message, neighbor):
+        """take one message and a neighbor as argument. Message will be sent to neighbor
+        and then deleted in the sending_list"""
+        if neighbor != message.last_node:
+            neighbor.receive_buffer.append(copy.deepcopy(message))
+            neighbor.receive_buffer[-1].last_node = self
+            self.sending_buffer.remove(message)
+
     def update_data(self, column, FLAG):
         """core function, check all the data in the receive_buffer and if they
         are unknown pushes them into the data_stack and the sending_buffer"""
         for data in self.receive_buffer:
             boolean = self.check_data_stack(data)
-            if boolean == False:
+            if not boolean:
                 data.add_to_path(self)
                 self.data_stack.append(data)
                 if FLAG != "SBA":
@@ -113,7 +121,7 @@ class Node(object):
                 # the value is stored in the row = to the origin of the packet
                 row = data.origin - 1
                 self.packet_history[row, column:] = data.value
-            elif boolean == True:
+            elif boolean:
                 pass
 
     def init_1_data(self):
@@ -160,6 +168,18 @@ class Node(object):
                 new_package.add_to_path(self)
             self.data_stack.append(new_package)
             self.sending_buffer.append(new_package)
+
+    def check_rebroadcast(self, iteration):
+        """If the sending_list is not empty, set the sender Flag to true.
+        -> node rebroadcasts messages"""
+        # if sender already true no need to further processing
+        # of if iteration = 0, i.e don't consider initial
+        # broadcasting nodes -> node.init_1_data() method
+        if self.sender or iteration == 0:
+            return
+        # if list not empty set flag to true
+        if self.sending_buffer:
+            self.sender == True
 
     sent = property(get_sent, set_sent)
     ID = property(get_ID)
