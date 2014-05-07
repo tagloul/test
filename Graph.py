@@ -97,9 +97,9 @@ def iteration_plots(graph):
     fig.savefig("iteration.png")
 
 
-def print_graph(graph):
+def print_graph(graph, sender):
     """ prints the graph"""
-    fig = plt.figure()
+    fig = plt.figure(sender)
     # stores the nodes and their name attributes in a dictionary
     nodes_names = nx.get_node_attributes(graph, "name")
     pos = nx.spring_layout(graph)
@@ -108,7 +108,8 @@ def print_graph(graph):
     nx.draw(graph, pos, with_labels=False)
     # draw the label with the nodes_names containing the name attribute
     nx.draw_networkx_labels(graph, pos, nodes_names)
-    plt.title("graph topology")
+    plt.title("graph topology: "+str(sender))
+    plt.show()
     fig.savefig("graph.png")
 
 

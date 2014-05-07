@@ -197,7 +197,7 @@ def check_receive_buffer(node_caller, column):
             message.add_to_path(node_caller)
             node_caller.data_stack.append(message)
             row = message.origin - 1
-            node_caller.packet_history[row, column:] = message.value
+            # node_caller.packet_history[row, column:] = message.value
                 # if oneself is in the BRG-Set add it to the sending-list
             if node_caller.ID in message.brg:
                 node_caller.sending_buffer.append(message)

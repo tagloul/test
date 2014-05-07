@@ -108,7 +108,7 @@ def get_random_timer(node_caller, graph):
         # set the random time value for the argument of the
         # uniform-distribution
     # this is a tuning-parameter, which is still open
-    random_timer = 2
+    random_timer = 3
     t = random.randint(0, math.ceil(T_0 * random_timer))
     return t
 
