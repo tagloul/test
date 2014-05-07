@@ -109,7 +109,8 @@ def print_graph(graph):
     # draw the label with the nodes_names containing the name attribute
     nx.draw_networkx_labels(graph, pos, nodes_names)
     plt.title("graph topology")
-    fig.savefig("graph.png")
+    plt.show()
+    # fig.savefig("graph.png")
 
 
 def print_all_data_stacks(graph):

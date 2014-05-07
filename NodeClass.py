@@ -17,7 +17,11 @@ class Node(object):
     obj_counter = 0  # in order to initiate the node.id
     locker = threading.Lock()
 
+<<<<<<< Updated upstream
     def __init__(self, size, iteration, graph):
+=======
+    def __init__(self): # just removed the number of iteration(iteration) and the size for the packet_history
+>>>>>>> Stashed changes
         # threading.Thread.__init__(self, name=self.__class__.obj_counter])
         self._ID = self.__class__.obj_counter
         self._data_stack = []
@@ -179,7 +183,7 @@ class Node(object):
             return
         # if list not empty set flag to true
         if self.sending_buffer:
-            self.sender == True
+            self.sender = True
 
     sent = property(get_sent, set_sent)
     ID = property(get_ID)
