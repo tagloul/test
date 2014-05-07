@@ -17,7 +17,7 @@ class Node(object):
     obj_counter = 0  # in order to initiate the node.id
     locker = threading.Lock()
 
-    def __init__(self, size, iteration, graph):
+    def __init__(self, size): # just removed the number of iteration for the packet_history
         # threading.Thread.__init__(self, name=self.__class__.obj_counter])
         self._ID = self.__class__.obj_counter
         self._data_stack = []
@@ -26,7 +26,7 @@ class Node(object):
         self.__class__.obj_counter += 1
         self.sender = False
         # matrix which stores the info when a node receive a packet
-        self.packet_history = np.zeros((size, iteration))
+        # self.packet_history = np.zeros((size, iteration))
         self.flag = ""
         # is a dict for SBA; contains packets with an active random timer
         self.packet_dict = {}
@@ -119,8 +119,8 @@ class Node(object):
                 if FLAG != "SBA":
                     self.sending_buffer.append(data)
                 # the value is stored in the row = to the origin of the packet
-                row = data.origin - 1
-                self.packet_history[row, column:] = data.value
+                # row = data.origin - 1
+                # self.packet_history[row, column:] = data.value
             elif boolean:
                 pass
 
@@ -131,7 +131,7 @@ class Node(object):
         new_package.add_to_path(self)
         self.data_stack.append(new_package)
         self.sending_buffer.append(new_package)
-        self.packet_history[self.ID, :] = new_package.value
+        # self.packet_history[self.ID, :] = new_package.value
 
     def init_data(self):  # todo find a way to eliminate these if statements
         """ugly random data generator -.- yet still does what it is supposed

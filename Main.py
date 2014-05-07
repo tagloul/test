@@ -142,7 +142,7 @@ def setup_sending_AHBP(graph, iteration):
             node.del_sending_buffer()
 
 
-def setup_graph(laplacian, iter_num):
+def setup_graph(laplacian):
     """ this function creates a graph object with the nodes and its edges
     already correct initialized"""
     # this block adds the nodes to the graph and creates two dict
@@ -166,9 +166,7 @@ def setup_graph(laplacian, iter_num):
                 node_2 = names_nodes[str(j + 1)]
                 my_graph.add_edge(node_1, node_2)
 
-    print(my_graph.edges())
     print('end of setup_graph')
-    Graph.print_graph(my_graph)
     return my_graph
 
 
@@ -246,7 +244,6 @@ def random_graph(num_nodes):
     while not graph_bool:
         degree_lst = [random.randint(1,6) for i in range(num_nodes)]
         graph_bool = nx.is_graphical(degree_lst)
-        print degree_lst
     gene_bool = False
     # Use try here because sometimes an the graph can not be generated within 10 tries
     # so try as long as it works
@@ -257,10 +254,11 @@ def random_graph(num_nodes):
         finally:
             pass
     graph.remove_edges_from(graph.selfloop_edges())
-    return graph
+    setup_graph(nx.laplacian_matrix(graph))
+    return rand_graph
 
 def sender_plot():
-    x_lst = [i for i in xrange(80)]
+    x_lst = [i for i in xrange(2, 81)]
     y_flood = []
     y_ahbp = []
     y_sba = []
@@ -271,7 +269,7 @@ def sender_plot():
         # get the average of rebbroadcasting nodes over three different graph
         # because the degree_lst may vary quite a lot
         # TODO think of a way on how to take into account the average degree of graphs
-        for i in range(3):
+        for a in range(3):
             # build random graph
             rand_graph = random_graph(i)
 
@@ -355,6 +353,7 @@ def main():
     #==========================================================================
 
     # my_graph = setup_graph(graph_matrix, ITERATION)
+    # Graph.print_graph(my_graph)
     # while True:
     #     num_sender = 0
     #     print "Your options are as follows:\n\n"\
