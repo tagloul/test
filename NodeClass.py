@@ -17,11 +17,7 @@ class Node(object):
     obj_counter = 0  # in order to initiate the node.id
     locker = threading.Lock()
 
-<<<<<<< Updated upstream
-    def __init__(self, size, iteration, graph):
-=======
-    def __init__(self): # just removed the number of iteration(iteration) and the size for the packet_history
->>>>>>> Stashed changes
+    def __init__(self, size, iteration): # just removed the number of iteration for the packet_history
         # threading.Thread.__init__(self, name=self.__class__.obj_counter])
         self._ID = self.__class__.obj_counter
         self._data_stack = []
@@ -123,8 +119,8 @@ class Node(object):
                 if FLAG != "SBA":
                     self.sending_buffer.append(data)
                 # the value is stored in the row = to the origin of the packet
-                row = data.origin - 1
-                self.packet_history[row, column:] = data.value
+                # row = data.origin - 1
+                # self.packet_history[row, column:] = data.value
             elif boolean:
                 pass
 
@@ -135,7 +131,7 @@ class Node(object):
         new_package.add_to_path(self)
         self.data_stack.append(new_package)
         self.sending_buffer.append(new_package)
-        self.packet_history[self.ID, :] = new_package.value
+        # self.packet_history[self.ID, :] = new_package.value
 
     def init_data(self):  # todo find a way to eliminate these if statements
         """ugly random data generator -.- yet still does what it is supposed

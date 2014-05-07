@@ -63,8 +63,7 @@ def setup_sending_flooding(graph, iteration, FLAG):
             node.del_sending_buffer()
             node.update_data(i + 1, FLAG)
             node.del_receive_buffer()
-        # Graph.print_all_data_stacks(graph)
-    print 'check_flood'
+        #Graph.print_all_data_stacks(graph)
 
 
 def setup_sending_SBA(graph, iteration, FLAG):
@@ -98,7 +97,6 @@ def setup_sending_SBA(graph, iteration, FLAG):
             node.del_sending_buffer()
             node.update_data(i + 1, FLAG)
             node.del_receive_buffer()
-    print 'check_SBA'
 
 
 def setup_sending_AHBP(graph, iteration):
@@ -138,15 +136,15 @@ def setup_sending_AHBP(graph, iteration):
 
         # rebroadcast the messages in the sending_buffer to the neighbors
         for node in graph.nodes_iter():
+            print node.sending_buffer
             # check if node rebroadcasts any messages
             node.check_rebroadcast(i)
             for neigh in node.two_hop_dict:
                 node.send_to_neighbor(neigh)
             node.del_sending_buffer()
-    print 'check_AHBP'
 
 
-def setup_graph(laplacian, iter_num):
+def setup_graph(laplacian, iteration):
     """ this function creates a graph object with the nodes and its edges
     already correct initialized"""
     # this block adds the nodes to the graph and creates two dict
@@ -154,7 +152,7 @@ def setup_graph(laplacian, iter_num):
     size = len(laplacian[0, :])
     my_graph = nx.Graph()
     for i in range(size):
-        my_graph.add_node(nde.Node(), name=str(i + 1))
+        my_graph.add_node(nde.Node(size, iteration), name=str(i + 1))
         #my_graph.add_node(nde.Node(size, iteration), name=str(i + 1))
     # stores the nodes and their name attributes in a dictionary
     nodes_names = nx.get_node_attributes(my_graph, "name")
@@ -164,17 +162,11 @@ def setup_graph(laplacian, iter_num):
     # this block adds the edges between the nodes
     for i in range(0, size):
         for j in range(i + 1, size):
-            if laplacian[i, j] == -1.:
+            if laplacian[i, j] == -1:
                 node_1 = names_nodes[str(i + 1)]
                 node_2 = names_nodes[str(j + 1)]
                 my_graph.add_edge(node_1, node_2)
 
-<<<<<<< Updated upstream
-    print(my_graph.edges())
-    print('end of setup_graph')
-    Graph.print_graph(my_graph)
-=======
->>>>>>> Stashed changes
     return my_graph
 
 
@@ -194,13 +186,13 @@ def setup_graph(laplacian, iter_num):
 #             if other_one != one_hop:
 #                 if one_hop in node.neigh_dict[other_one] and other_one not in node.neigh_dict[one_hop]:
 #                     node.neigh_dict[one_hop].append(other_one)
-# 
-# 
+#
+#
 # #===============================================================================
 # # def check_two_hop_edges(node):
-# #      
+# #
 # #===============================================================================
-# 
+#
 # def hello_operation(graph):
 #     for node in graph.nodes_iter():
 #         for hello in node.receive_buffer:
@@ -208,7 +200,7 @@ def setup_graph(laplacian, iter_num):
 #             check_one_hop_edges(node)
 #         send_HELLO(node, graph)
 #     for node in graph.nodes_iter():
-#         
+#
 #===============================================================================
 
 
@@ -251,12 +243,7 @@ def random_graph(num_nodes):
     # generate a graphically meaningful degree sequence
     while not graph_bool:
         degree_lst = [random.randint(1,6) for i in range(num_nodes)]
-<<<<<<< Updated upstream
         graph_bool = nx.is_graphical(degree_lst)
-        print degree_lst
-=======
-        graph_bool = nx.is_graphical(degree_lst) and nx.is_valid_degree_sequence(degree_lst)
->>>>>>> Stashed changes
     gene_bool = False
     # Use try here because sometimes an the graph can not be generated within 10 tries
     # so try as long as it works
@@ -267,19 +254,13 @@ def random_graph(num_nodes):
         finally:
             pass
     graph.remove_edges_from(graph.selfloop_edges())
-<<<<<<< Updated upstream
-    return graph
-
-def sender_plot():
-    x_lst = [i for i in xrange(80)]
-=======
     matrix = nx.laplacian_matrix(graph)
+    # getA() changes the type from matrix to array
     rand_graph = setup_graph(matrix.getA())
     return rand_graph
 
 def sender_plot():
     x_lst = [i for i in xrange(2, 10)]
->>>>>>> Stashed changes
     y_flood = []
     y_ahbp = []
     y_sba = []
@@ -290,9 +271,10 @@ def sender_plot():
         # get the average of rebbroadcasting nodes over three different graph
         # because the degree_lst may vary quite a lot
         # TODO think of a way on how to take into account the average degree of graphs
-        for i in range(3):
+        for a in range(3):
             # build random graph
             rand_graph = random_graph(i)
+
             # get values for flooding
             setup_sending_flooding(rand_graph, i-1, 'flooding')
             flood_rebroadcast += get_num_sender(rand_graph)
@@ -303,9 +285,8 @@ def sender_plot():
             # get values for ahbp
             setup_sending_AHBP(rand_graph, i-1)
             ahbp_rebroadcast += get_num_sender(rand_graph)
-            for node in rand_graph:
+            for node in rand_graph.nodes_iter():
                 print node.sender
-            print ahbp_rebroadcast
 
 
             set_sender_false(rand_graph)
@@ -321,7 +302,7 @@ def sender_plot():
         y_flood.append(flood_rebroadcast/3.0)
         y_ahbp.append(ahbp_rebroadcast/3.0)
         y_sba.append(sba_rebroadcast/9.0)
-    print y_flood
+
     fig, (ax1, ax2, ax3) = plt.subplots(3, sharex=True, sharey=True)
     ax1.plot(x_lst, y_flood)
     ax1.set_title('pure flooding')
@@ -365,20 +346,18 @@ def main():
     #                          [ 0,  0,  0,  0,  0,  0,  0,  0,  0,  0, -1,  1,  0],
     #                          [ 0,  0,  0,  0,  0,  0,  0,  0,  0, -1, -1,  0,  2]])
 
-    graph_matrix = np.array([[ 1,-1, 0, 0],
-                             [-1, 2,-1, 0],
-                             [ 0,-1, 2,-1],
-                             [ 0, 0,-1, 1]])
+
     #==========================================================================
-    # graph_matrix = np.array([[ 2, -1,  0,  0, -1,  0],
-    #                          [-1,  3, -1,  0, -1,  0],
-    #                          [ 0, -1,  2, -1,  0,  0],
-    #                          [ 0,  0, -1,  3, -1, -1],
-    #                          [-1, -1,  0, -1,  3,  0],
-    #                          [ 0,  0,  0, -1,  0,  1]])
+    graph_matrix = np.array([[ 2, -1,  0,  0, -1,  0],
+                             [-1,  3, -1,  0, -1,  0],
+                             [ 0, -1,  2, -1,  0,  0],
+                             [ 0,  0, -1,  3, -1, -1],
+                             [-1, -1,  0, -1,  3,  0],
+                             [ 0,  0,  0, -1,  0,  1]])
     #==========================================================================
 
     my_graph = setup_graph(graph_matrix, ITERATION)
+    Graph.print_graph(my_graph)
     while True:
         num_sender = 0
         print "Your options are as follows:\n\n"\
