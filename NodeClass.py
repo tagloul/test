@@ -179,7 +179,7 @@ class Node(object):
             return
         # if list not empty set flag to true
         if self.sending_buffer:
-            self.sender == True
+            self.sender = True
 
     sent = property(get_sent, set_sent)
     ID = property(get_ID)

@@ -81,7 +81,7 @@ def setup_sending_SBA(graph, iteration, FLAG):
         # forward packet in the sending list to neighbors
         for node in graph.nodes():
             # check if node rebroadcasts any messages
-            node.check_rebroadcsat(i)
+            node.check_rebroadcast(i)
             for neigh in graph.neighbors_iter(node):
                 node.send_to_neighbor(neigh)
 
@@ -150,9 +150,8 @@ def setup_graph(laplacian):
     size = len(laplacian[0, :])
     my_graph = nx.Graph()
     for i in range(size):
-        my_graph.add_node(nde.Node(size, iter_num, my_graph), name=str(i + 1))
+        my_graph.add_node(nde.Node(size), name=str(i + 1))
         #my_graph.add_node(nde.Node(size, iteration), name=str(i + 1))
-    print(my_graph.nodes())
     # stores the nodes and their name attributes in a dictionary
     nodes_names = nx.get_node_attributes(my_graph, "name")
     # switches key and values--> thus names_nodes
@@ -166,7 +165,6 @@ def setup_graph(laplacian):
                 node_2 = names_nodes[str(j + 1)]
                 my_graph.add_edge(node_1, node_2)
 
-    print('end of setup_graph')
     return my_graph
 
 
@@ -249,16 +247,18 @@ def random_graph(num_nodes):
     # so try as long as it works
     while not gene_bool:
         try:
-            graph = nx.random_degree_sequence_graph(degree_lst)
+            graph = nx.random_degree_sequence_graph(degree_lst, tries=1000)
             gene_bool = True
         finally:
             pass
     graph.remove_edges_from(graph.selfloop_edges())
-    setup_graph(nx.laplacian_matrix(graph))
+    matrix = nx.laplacian_matrix(graph)
+    # getA() changes the type from matrix to array
+    rand_graph = setup_graph(matrix.getA())
     return rand_graph
 
 def sender_plot():
-    x_lst = [i for i in xrange(2, 81)]
+    x_lst = [i for i in xrange(2, 10)]
     y_flood = []
     y_ahbp = []
     y_sba = []
@@ -276,7 +276,6 @@ def sender_plot():
             # get values for flooding
             setup_sending_flooding(rand_graph, i-1, 'flooding')
             flood_rebroadcast += get_num_sender(rand_graph)
-
             # set all the sender flags to false again
             # so one can reuse the same graph
             set_sender_false(rand_graph)
@@ -290,7 +289,7 @@ def sender_plot():
             setup_sending_SBA(rand_graph, i-1, 'SBA')
             sba_rebroadcast += get_num_sender(rand_graph)
             # since SBA has a random timer get some more samples for an accurate result
-            for i in range(2):
+            for b in range(2):
                 rand_graph = random_graph(i)
                 setup_sending_SBA(rand_graph, i-1, 'SBA')
                 sba_rebroadcast += get_num_sender(rand_graph)
@@ -299,19 +298,19 @@ def sender_plot():
         y_ahbp.append(ahbp_rebroadcast/3.0)
         y_sba.append(sba_rebroadcast/9.0)
 
-        fig, (ax1, ax2, ax3) = plt.subplots(3, sharex=True, sharey=True)
-        ax1.plot(x_lst, y_flood)
-        ax1.title('pure flooding')
+    fig, (ax1, ax2, ax3) = plt.subplots(3, sharex=True, sharey=True)
+    ax1.plot(x_lst, y_flood)
+    ax1.set_title('pure flooding')
 
-        ax2.plot(x_lst, y_ahbp)
-        ax2.title('ad-hoc broadcast protocol')
+    ax2.plot(x_lst, y_ahbp)
+    ax2.set_title('ad-hoc broadcast protocol')
 
-        ax3.plot(x_lst, y_sba)
-        ax3.title('scalabe broadcast algorithm')
+    ax3.plot(x_lst, y_sba)
+    ax3.set_title('scalabe broadcast algorithm')
 
-        plt.show(fig)
+    plt.show(fig)
 
-        fig.savefig('sender_plots.png')
+    fig.savefig('sender_plots.png')
 
 
 
