@@ -135,6 +135,7 @@ def setup_sending_AHBP(graph, iteration):
 
         # rebroadcast the messages in the sending_buffer to the neighbors
         for node in graph.nodes_iter():
+            print node.sending_buffer
             # check if node rebroadcasts any messages
             node.check_rebroadcast(i)
             for neigh in node.two_hop_dict:
@@ -283,6 +284,9 @@ def sender_plot():
             # get values for ahbp
             setup_sending_AHBP(rand_graph, i-1)
             ahbp_rebroadcast += get_num_sender(rand_graph)
+            for node in rand_graph.nodes_iter():
+                print node.sender
+
 
             set_sender_false(rand_graph)
 
