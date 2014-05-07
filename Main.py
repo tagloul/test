@@ -9,6 +9,7 @@ import NodeClass as nde
 import SBAClass as sba
 import AHBPClass as ahbp
 import random
+import numpy as np
 import Package as pkt
 
 
@@ -81,7 +82,7 @@ def setup_sending_SBA(graph, iteration, FLAG):
         # forward packet in the sending list to neighbors
         for node in graph.nodes():
             # check if node rebroadcasts any messages
-            node.check_rebroadcsat(i)
+            node.check_rebroadcast(i)
             for neigh in graph.neighbors_iter(node):
                 node.send_to_neighbor(neigh)
 
@@ -328,7 +329,7 @@ sba_lst = {}
 
 def main():
     """main function which performs the whole retransmission"""
-    sender_plot()
+    # sender_plot()
     # # laplacian matrix -> has the information about the network-topology
     # graph_matrix = np.array([[ 3, -1,  0, -1, -1,  0,  0,  0,  0,  0,  0,  0,  0],
     #                          [-1,  3, -1, -1,  0,  0,  0,  0,  0,  0,  0,  0,  0],
@@ -344,7 +345,10 @@ def main():
     #                          [ 0,  0,  0,  0,  0,  0,  0,  0,  0,  0, -1,  1,  0],
     #                          [ 0,  0,  0,  0,  0,  0,  0,  0,  0, -1, -1,  0,  2]])
 
-
+    graph_matrix = np.array([[ 1,-1, 0, 0],
+                             [-1, 2,-1, 0],
+                             [ 0,-1, 2,-1],
+                             [ 0, 0,-1, 1]])
     #==========================================================================
     # graph_matrix = np.array([[ 2, -1,  0,  0, -1,  0],
     #                          [-1,  3, -1,  0, -1,  0],
@@ -354,39 +358,39 @@ def main():
     #                          [ 0,  0,  0, -1,  0,  1]])
     #==========================================================================
 
-    # my_graph = setup_graph(graph_matrix, ITERATION)
-    # while True:
-    #     num_sender = 0
-    #     print "Your options are as follows:\n\n"\
-    #       "flooding ->\tPure Flooding in the Network\n"\
-    #       "SBA ->\t\tScalable Broadcast Algorithm\n"\
-    #       "AHBP ->\t\tAd-Hoc Broadcast Protocol\n"
-    #     FLAG = raw_input("Enter your Flag. To quit press enter\n")
-    #     if FLAG == "":
-    #         print 'Application is now shutting down'
-    #         break
-    #     elif FLAG == "SBA":
-    #         setup_sending_SBA(my_graph, ITERATION, FLAG)
-    #         for node in my_graph.nodes():
-    #             if node.sender == True:
-    #                 num_sender += 1
-    #         flood_lst[my_graph.number_of_nodes()] = num_sender
-    #         print 'check SBA calculations'
-    #     elif FLAG == "AHBP":
-    #         setup_sending_AHBP(my_graph, ITERATION)
-    #         for node in my_graph.nodes():
-    #             if node.sender == True:
-    #                 num_sender += 1
-    #         ahbp_lst[my_graph.number_of_nodes()] = num_sender
-    #         print 'check AHBP calculations'
-    #     elif FLAG == "flooding":
-    #         setup_sending_flooding(my_graph, ITERATION, FLAG)
-    #         for node in my_graph.nodes():
-    #             if node.sender == True:
-    #                 num_sender += 1
-    #         sba_lst[my_graph.number_of_nodes()] = num_sender
-    #         print 'check flooding calculations'
-    #     create_figure(my_graph)
+    my_graph = setup_graph(graph_matrix, ITERATION)
+    while True:
+        num_sender = 0
+        print "Your options are as follows:\n\n"\
+          "flooding ->\tPure Flooding in the Network\n"\
+          "SBA ->\t\tScalable Broadcast Algorithm\n"\
+          "AHBP ->\t\tAd-Hoc Broadcast Protocol\n"
+        FLAG = raw_input("Enter your Flag. To quit press enter\n")
+        if FLAG == "":
+            print 'Application is now shutting down'
+            break
+        elif FLAG == "SBA":
+            setup_sending_SBA(my_graph, ITERATION, FLAG)
+            for node in my_graph.nodes():
+                if node.sender == True:
+                    num_sender += 1
+            flood_lst[my_graph.number_of_nodes()] = num_sender
+            print 'check SBA calculations'
+        elif FLAG == "AHBP":
+            setup_sending_AHBP(my_graph, ITERATION)
+            for node in my_graph.nodes():
+                if node.sender == True:
+                    num_sender += 1
+            ahbp_lst[my_graph.number_of_nodes()] = num_sender
+            print 'check AHBP calculations'
+        elif FLAG == "flooding":
+            setup_sending_flooding(my_graph, ITERATION, FLAG)
+            for node in my_graph.nodes():
+                if node.sender == True:
+                    num_sender += 1
+            sba_lst[my_graph.number_of_nodes()] = num_sender
+            print 'check flooding calculations'
+        create_figure(my_graph)
 
 
 
