@@ -135,7 +135,7 @@ def setup_sending_AHBP(graph, iteration):
 
         # rebroadcast the messages in the sending_buffer to the neighbors
         for node in graph.nodes_iter():
-            print node.sending_buffer
+            # print node.sending_buffer
             # check if node rebroadcasts any messages
             node.check_rebroadcast(i)
             for neigh in node.two_hop_dict:
@@ -256,6 +256,7 @@ def random_graph(num_nodes):
     matrix = nx.laplacian_matrix(graph)
     # getA() changes the type from matrix to array
     rand_graph = setup_graph(matrix.getA())
+    print matrix
     return rand_graph
 
 def sender_plot():
