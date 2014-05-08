@@ -300,21 +300,27 @@ def random_graph(num_nodes):
     return rand_graph
 
 def sender_plot():
-    x_lst = [i for i in xrange(2, 31)]
+    x_lst = [i for i in xrange(2, 21)]
     y_flood = []
     y_ahbp = []
     y_sba = []
+    y_deg_flood_ahbp = []
+    y_deg_sba = []
     for i in x_lst:
         print i
         flood_rebroadcast = 0
         ahbp_rebroadcast = 0
         sba_rebroadcast = 0
+        flood_ahbp_deg = 0
+        sba_deg = 0
         # get the average of rebbroadcasting nodes over three different graph
         # because the degree_lst may vary quite a lot
         # TODO think of a way on how to take into account the average degree of graphs
         for a in range(3):
             # build random graph
             rand_graph = random_graph(i)
+            flood_ahbp_deg += average_degree(rand_graph)
+            sba_deg += average_degree(rand_graph)
             # get values for flooding
             setup_sending_flooding(rand_graph, i-1, 'flooding')
             flood_rebroadcast += get_num_sender(rand_graph)
@@ -337,12 +343,16 @@ def sender_plot():
             # since SBA has a random timer get some more samples for an accurate result
             for b in range(2):
                 rand_graph = random_graph(i)
+                sba_deg += average_degree(rand_graph)
                 setup_sending_SBA(rand_graph, i-1, 'SBA')
                 sba_rebroadcast += get_num_sender(rand_graph)
 
         y_flood.append(flood_rebroadcast/3.0)
         y_ahbp.append(ahbp_rebroadcast/3.0)
         y_sba.append(sba_rebroadcast/9.0)
+
+        y_deg_flood_ahbp.append(flood_ahbp_deg/3.0)
+        y_deg_sba.append(sba_deg/9.0)
 
     fig, (ax1, ax2, ax3) = plt.subplots(3, sharex=True, sharey=True)
     ax1.plot(x_lst, y_flood)
@@ -354,10 +364,17 @@ def sender_plot():
     ax3.plot(x_lst, y_sba)
     ax3.set_title('scalabe broadcast algorithm')
 
-    plt.show(fig)
+    fig2, (axi1, axi2) = plt.subplots(2, sharex=True, sharey=True)
+    axi1.plot(x_lst, y_deg_flood_ahbp)
+    axi1.set_title('average degree for flooding and ahbp')
+
+    axi2.plot(x_lst, y_deg_sba)
+    axi2.set_title('average degree for sba graphs')
+
+    plt.show()
 
     fig.savefig('sender_plots.png')
-
+    fig2.savefig('degree_plots.png')
 
 
 ITERATION = 10
