@@ -10,6 +10,9 @@ import SBAClass as sba
 import AHBPClass as ahbp
 import random
 import numpy as np
+import itertools as it
+from networkx.algorithms import bipartite
+import planarity
 import Package as pkt
 
 
@@ -246,22 +249,50 @@ def clear_graph_data(graph):
         node.del_data_stack()
 
 
+def is_planar(G):
+    """
+    function checks if graph G has K(5) or K(3,3) as minors,
+    returns True /False on planarity and nodes of "bad_minor"
+    """
+    result = True
+    bad_minor = []
+    n = len(G.nodes())
+    if n > 5:
+        for subnodes in it.combinations(G.nodes(),6):
+            sub_graph = G.subgraph(subnodes)
+            if bipartite.is_bipartite(G):  # check if the graph G has a subgraph K(3,3)
+                X, Y = bipartite.sets(G)
+                if len(X) == 3:
+                    result = False
+                    bad_minor = subnodes
+    if n > 4 and result:
+        for subnodes in it.combinations(G.nodes(), 5):
+            sub_graph = G.subgraph(subnodes)
+            if len(sub_graph.edges()) == 10:  # check if the graph G has a subgraph K(5)
+                result = False
+                bad_minor = subnodes
+    return result, bad_minor
+
+
 def random_graph(num_nodes):
-    graph_bool = False
-    # generate a graphically meaningful degree sequence
-    while not graph_bool:
-        degree_lst = [random.randint(1,6) for i in range(num_nodes)]
-        graph_bool = nx.is_graphical(degree_lst)
-    gene_bool = False
-    # Use try here because sometimes an the graph can not be generated within 10 tries
-    # so try as long as it works
-    while not gene_bool:
-        try:
-            graph = nx.random_degree_sequence_graph(degree_lst, tries=1000)
-            gene_bool = True
-        finally:
-            pass
-    graph.remove_edges_from(graph.selfloop_edges())
+    planar_bool = False
+    while not planar_bool:
+        graph_bool = False
+        # generate a graphically meaningful degree sequence
+        while not graph_bool:
+            degree_lst = [random.randint(1,6) for i in range(num_nodes)]
+            graph_bool = nx.is_graphical(degree_lst)
+        gene_bool = False
+        # Use try here because sometimes an the graph can not be generated within 10 tries
+        # so try as long as it works
+        while not gene_bool:
+            try:
+                graph = nx.random_degree_sequence_graph(degree_lst, tries=1000)
+                gene_bool = True
+            finally:
+                pass
+        graph.remove_edges_from(graph.selfloop_edges())
+        planar_bool = planarity.is_planar(graph)
     matrix = nx.laplacian_matrix(graph)
     # getA() changes the type from matrix to array
     array = matrix.getA()
@@ -269,11 +300,12 @@ def random_graph(num_nodes):
     return rand_graph
 
 def sender_plot():
-    x_lst = [i for i in xrange(2, 10)]
+    x_lst = [i for i in xrange(2, 31)]
     y_flood = []
     y_ahbp = []
     y_sba = []
     for i in x_lst:
+        print i
         flood_rebroadcast = 0
         ahbp_rebroadcast = 0
         sba_rebroadcast = 0
