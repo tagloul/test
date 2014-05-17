@@ -1,36 +1,30 @@
-import NodeClass as nde
+"""
+This file contains all functions related to the Ad-Hoc Broadcast Protocol.
+Note that since it does not inherit from the Node Class, the considered node
+is always passed as an argument -> calling_node
+"""
 import networkx as nx
 
 
-    #==========================================================================
-    # def __init__(self, size, iteration, graph):
-    #     super(AHBP, self).__init__(size, iteration, graph)
-    #     self.two_hop_dict = {}
-    #     self.flag = "AHBP"
-    #==========================================================================
+def build_2_hop(calling_node, graph):
+    """Build the two-hop neighborhood
 
+    It adds the 2-hop-neighborhood as a dictionary
+    to the calling_node attribute.
 
-def dummy_method(node_caller):
-    print 'check for dummies'
-    other_dummy()
+    Arguments:
+    calling_node -- node whose neighborhood is desired
+    graph -- networkx.Graph object containing the graph topology
 
-
-def other_dummy(node_caller):
-    print 'another dummy ohh wow'
-
-    # As soon as Hello messages are implemented remove this function
-    # and build the two-hop neighborhood with the inforamtion from the
-    # hello-messages
-
-
-def build_2_hop(node_caller, graph):
-    """this is gonna build the two-hop neighborhood of a node"""
-    for node in graph.neighbors(node_caller):
+    Return-type:
+    None
+    """
+    for node in graph.neighbors(calling_node):
         two_hop_lst = []
         for neigh in graph.neighbors(node):
-            if neigh != node_caller and neigh not in graph.neighbors(node_caller):
+            if neigh != calling_node and neigh not in graph.neighbors(calling_node):
                 two_hop_lst.append(neigh)
-        node_caller.two_hop_dict[node] = two_hop_lst
+        calling_node.two_hop_dict[node] = two_hop_lst
 
 
 def del_brg(message):
@@ -38,37 +32,54 @@ def del_brg(message):
     message.brg = []
 
 
-def build_2_hop_graph(node_caller):
-    """with the two-hop neighborhood information of a node
-    builds a networkx graph, in order to perform the algorithm"""
+def build_2_hop_graph(calling_node):
+    """Build a graph containing 2-hop-neighborhood of calling_node
+
+    With the 2-hop-neighborhood as a dictionary in the calling_node
+    build a graph of the neighborhood with Node instances
+
+    Arguments:
+    calling_node -- node whose neighborhood is desired
+
+    Return-type:
+    my_graph -- networkx.Graph object
+    """
     my_graph = nx.Graph()
-    my_graph.add_node(node_caller)
-    for node in node_caller.two_hop_dict:
+    my_graph.add_node(calling_node)
+    for node in calling_node.two_hop_dict:
         my_graph.add_node(node)
-        my_graph.add_nodes_from(node_caller.two_hop_dict[node])
-    for node in node_caller.two_hop_dict:
-        my_graph.add_edge(node_caller, node)
-        for neigh in node_caller.two_hop_dict[node]:
+        my_graph.add_nodes_from(calling_node.two_hop_dict[node])
+    for node in calling_node.two_hop_dict:
+        my_graph.add_edge(calling_node, node)
+        for neigh in calling_node.two_hop_dict[node]:
             my_graph.add_edge(node, neigh)
         #print('check: built the graph')
         #self.print_graph_id(my_graph)
     return my_graph
 
 
-def check_path_node(node_caller, del_lst, path_lst, node):
+def check_path_node(calling_node, del_lst, path_lst, node):
     bool_check = False
     bool_check = node.ID + 1 != path_lst[-1]
     if bool_check == True:
         bool_check = node not in del_lst
         if bool_check == True:
-            bool_check = node != node_caller
+            bool_check = node != calling_node
             return bool_check
     return False
 
 
-def remove_path_nodes(node_caller, graph, message):
-    """iterates through the path of the message and deletes nodes
-    and their neighbors if they are in the path"""
+def remove_path_nodes(calling_node, graph, message):
+    """Delete nodes and their neighbors of the message path from the graph
+
+    Arguments:
+    calling_node -- Currently treated node
+    graph -- networkx.Graph containg the 2-hop-neighborhood of calling_node
+    message -- Packet-instace currently treated
+
+    Return-type:
+    None
+    """
     del_lst = []
     ID_lst = [node.ID + 1 for node in graph.nodes()]
     for node_id in ID_lst:
@@ -77,7 +88,7 @@ def remove_path_nodes(node_caller, graph, message):
             node = graph.nodes()[index]
             del_lst.append(node)
             for neigh in graph.neighbors(node):
-                bool_check = check_path_node(node_caller, del_lst, message.path, neigh)
+                bool_check = check_path_node(calling_node, del_lst, message.path, neigh)
                 if bool_check == True:
                     del_lst.append(neigh)
                 #==============================================================
@@ -92,12 +103,20 @@ def remove_path_nodes(node_caller, graph, message):
     graph.remove_nodes_from(del_lst)
 
 
-def remove_edges(node_caller, graph):
-    """detects edges between 1-hop neighbors and deletes them"""
+def remove_edges(calling_node, graph):
+    """Detect edges between 1-hop neighbors in the graph and delete them
+
+    Arguments:
+    calling_node -- currently treated node
+    graph -- networkx.Graph containing the 2-hop-neighborhood of calling-node
+
+    Return-type:
+    None
+    """
     edges_lst = []
     for edge in graph.edges_iter():
         n1, n2 = edge
-        if (n1 in graph.neighbors(node_caller)) and (n2 in graph.neighbors(node_caller)):
+        if (n1 in graph.neighbors(calling_node)) and (n2 in graph.neighbors(calling_node)):
             edges_lst.append(edge)
 
     graph.remove_edges_from(edges_lst)
@@ -105,16 +124,23 @@ def remove_edges(node_caller, graph):
         #self.print_graph_id(graph)
 
 
-def remove_nodes(node_caller, graph):
-    """removes nodes with degree = 0 from the graph and 1-hop neighbors
-    with no other neighbors, i.e. degree = 1"""
+def remove_nodes(calling_node, graph):
+    """Remove isolated nodes and 1-hop-neighbors with degree = 1
+
+    Arguments:
+    calling_node -- currently treated node
+    graph -- networkx.Graph containing the 2-hop-neighborhood of calling-node
+
+    Return-type:
+    None
+    """
     node_lst = []
         # nodes with degree = 0
     for node in graph.nodes():
         if graph.degree(node) == 0:
             node_lst.append(node)
         # 1-hop neighbors with degree = 1
-    for node in graph.neighbors(node_caller):
+    for node in graph.neighbors(calling_node):
         if graph.degree(node) == 1:
             node_lst.append(node)
     graph.remove_nodes_from(node_lst)
@@ -124,19 +150,30 @@ def remove_nodes(node_caller, graph):
         #self.print_graph_id(graph)
 
 
-def add_to_BRG(node_caller, graph, message):
-    """looks out for the required nodes and adds them to the
-    BRG-Set"""
+def add_to_BRG(calling_node, graph, message):
+    """Add suiting nodes to the BRG-set of a message.
+
+    Add suiting nodes according to tha AHBP of the remaining ones to the BRG-set
+    of the message and then remove them from the graph.
+
+    Arguments:
+    calling_node -- currently treated node
+    graph -- networkx.Graph containing the 2-hop-neighborhood of calling-node
+    message -- currently treated message of calling_node
+
+    Return-type:
+    None
+    """
     if graph.nodes() == []:
         return None
-    one_hop = graph.neighbors(node_caller)
+    one_hop = graph.neighbors(calling_node)
     two_hop = []
     counter = 0
     added_node = 0
         #build the two-hop neighbor list
     for node in one_hop:
         for neigh in graph.neighbors(node):
-            if neigh in two_hop == False and neigh != node_caller:
+            if neigh in two_hop == False and neigh != calling_node:
                 two_hop.append(neigh)
         # look for nodes in the two-hop neighborhood with degree one
     for node in two_hop:
@@ -158,7 +195,7 @@ def add_to_BRG(node_caller, graph, message):
     if added_node != 0:
         del_lst.append(added_node)
         for neigh in graph.neighbors(added_node):
-            if neigh != node_caller:
+            if neigh != calling_node:
                 del_lst.append(neigh)
     graph.remove_nodes_from(del_lst)
         #print('check: added to BRG')
@@ -167,55 +204,71 @@ def add_to_BRG(node_caller, graph, message):
         #self.print_graph_id(graph)
 
 
-def build_BRG(node_caller, message):
-    """this function puts together the previous ones and uses them
-    to build the BRG-Set of the calling node for a certain message"""
-    #print('actual node:')
-    #print(node_caller.ID + 1)
+def build_BRG(calling_node, message):
+    """Build the BRG-set of a message
 
-    my_graph = build_2_hop_graph(node_caller)
+    Delete path-nodes and their neighbors and edges between one-hop-neighbors.
+    As long as there are nodes in the graph delete isolated nodes,
+    1-hop neighbors with degree 1 and then add suiting nodes to the BRG-set
+
+    Arguments:
+    calling_node -- Node object ; currently treated node
+    message -- Packet object ; currently treated message
+
+    Return-type:
+    None
+    """
+    #print('actual node:')
+    #print(calling_node.ID + 1)
+
+    my_graph = build_2_hop_graph(calling_node)
         #print(self)
     del_brg(message)
-    remove_path_nodes(node_caller, my_graph, message)
-    remove_edges(node_caller, my_graph)
+    remove_path_nodes(calling_node, my_graph, message)
+    remove_edges(calling_node, my_graph)
         # as long as there are nodes in the graph update the BRG-Set
     while(len(my_graph.nodes()) > 0):
-        remove_nodes(node_caller, my_graph)
-        add_to_BRG(node_caller, my_graph, message)
+        remove_nodes(calling_node, my_graph)
+        add_to_BRG(calling_node, my_graph, message)
             #print('remaining nodes:')
             #print(len(my_graph.nodes()))
 
 
-def check_receive_buffer(node_caller, column):
-    """loops through the receive-list and check if messages are
-    unknown. If the message is unknown,
-    checks the BRG-Set appended to the message"""
-    for message in node_caller.receive_buffer:
+def check_receive_buffer(calling_node, column):
+    """Check the recieve-buffer for unknown messages and if oneself is in the BRG-set
+
+    Arguments:
+    calling_node -- Node object ; currently treated node
+
+    Return-type:
+    None
+    """
+    for message in calling_node.receive_buffer:
             # add unknown messages to the data-list
-        bool_ds = node_caller.check_data_stack(message)  # m in self.data_stack
+        bool_ds = calling_node.check_data_stack(message)  # m in self.data_stack
         if bool_ds == False:
-            message.add_to_path(node_caller)
-            node_caller.data_stack.append(message)
+            message.add_to_path(calling_node)
+            calling_node.data_stack.append(message)
             row = message.origin - 1
-            # node_caller.packet_history[row, column:] = message.value
+            # calling_node.packet_history[row, column:] = message.value
                 # if oneself is in the BRG-Set add it to the sending-list
-            if node_caller.ID in message.brg:
-                node_caller.sending_buffer.append(message)
+            if calling_node.ID in message.brg:
+                # calling_node.sender = True
+                calling_node.sending_buffer.append(message)
 
 
     # only for debugging
-def print_graph_id(node_caller, graph):
-    """prints the node ID's of the graph used to compute the
-    BRG-Set"""
+def print_graph_id(calling_node, graph):
+    """prints the node ID's of the graph used to compute the BRG-Set"""
     print('number of nodes in graph remaining:')
     print(len(graph.nodes()))
     print([node.ID for node in graph.nodes_iter()])
     print('center:')
-    if node_caller in graph.nodes():
-        print(node_caller.ID)
+    if calling_node in graph.nodes():
+        print(calling_node.ID)
     else:
         return None
-    for node in graph.neighbors(node_caller):
+    for node in graph.neighbors(calling_node):
         print('one-hop:')
         print(node.ID)
         print('two-hop:')
