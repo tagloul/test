@@ -9,7 +9,6 @@ import copy
 import random
 import this  # quit thinking about this module. too hard for you!!
 import Package as pac
-import threading
 
 
 class Node(object):
@@ -17,8 +16,6 @@ class Node(object):
 
     class attributes:
     obj_counter -- counter in order to get for every node a different ID
-
-
     """
     obj_counter = 0  # in order to initiate the node.id
 
@@ -37,6 +34,7 @@ class Node(object):
         flag -- Indicate which sending algorithm is used
         two_hop_dict -- Dict with 1-hop neighbors as key and 2-hop neigh as their values
         cover_dict -- Cover-set for the SBA
+        message_counter -- Keep track of the sent messages by the node
 
         Most important Methods:
         send_to_neighbor -- send the whole sending_buffer to a neighbor
@@ -57,10 +55,10 @@ class Node(object):
         # cover-set for SBA; keys are the covered 1-hop neighbors
         # and the values are their neighbors
         self.cover_dict = {}
-        # both are the same, just use two different dict for now, cuz
-        # i want to test the hello-messages
+        # contains the two_hop-neighborhood. 1-hop are keys; 2-hop their values
         self.two_hop_dict = {}
-        self.neigh_dict = {}
+        # track the number of sent messages by the node
+        self.message_counter = 0
 
     def get_ID(self):
         """ID getter"""
@@ -124,14 +122,14 @@ class Node(object):
         """
         for item in self.sending_buffer:
             if neighbor != item.last_node:
+                self.message_counter += 1
                 # deepcopy guarantees everything is copied
                 neighbor.receive_buffer.append(copy.deepcopy(item))
                 neighbor.receive_buffer[-1].last_node = self
                 # set the sender flag to true only for sending nodes
                 # which are not the source of the message
-                if item.last_node.ID != self.ID:
+                if item.origin != self.ID+1:
                     self.sender = True
-
 
     def update_data(self, column, FLAG):
         """Check the receive_buffer for unknown messages

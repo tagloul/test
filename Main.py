@@ -11,6 +11,23 @@ import AHBPClass as ahbp
 import random
 import numpy as np
 
+def get_message_counter(graph):
+    """Compute the total number of sent messages in the network
+
+    Iterate through all the nodes in the network and add up their
+    message_counter to get the total number.
+
+    Arguments:
+    graph -- networkx Graph representing the network
+
+    Return-type:
+    total_number -- total number of sent messages
+    """
+    total_number = 0
+    for node in graph.nodes():
+        total_number += node.message_counter
+
+    return total_number
 
 def setup_sending_flooding(graph, iteration, FLAG):
     """Perfrom the sending process according to pure flooding
@@ -181,12 +198,6 @@ def create_figure(graph):
     print 'check plot generating'
 
 
-def set_sender_false(graph):
-    """Set all sender flags in the graph to False"""
-    for node in graph.nodes_iter():
-        node.sender = False
-
-
 def get_num_sender(graph):
     """Iterate through graph and count true sender flags"""
     rebroadcaster = 0
@@ -206,11 +217,13 @@ def average_degree(graph):
 
 
 def clear_graph_data(graph):
-    """Clear all the messages in the Node isntances"""
-    for node in graph:
+    """Clear counter, flags and messages in the graph"""
+    for node in graph.nodes_iter():
         node.del_sending_buffer()
         node.del_receive_buffer()
         node.del_data_stack()
+        node.sender = False
+        node.message_counter = 0
 
 
 def random_graph(num_nodes):
@@ -248,6 +261,9 @@ def random_graph(num_nodes):
 def build_line_laplacian(size):
     """Build laplacian of line-graph and return it as numpy.array"""
     my_ar = np.eye(size)
+    if size == 2:
+        my_ar = np.array([[1, -1],
+                          [-1, 1]])
     for i in range(1, size-1):
         my_ar[i, i] += 1
         my_ar[i-1, i] = -1
@@ -261,45 +277,61 @@ def test_rebroadcasting():
     y_flood = []
     y_ahbp = []
     y_sba = []
-    x_lst = [i for i in xrange(2, 10)]
+    y_message_flood = []
+    y_message_ahbp = []
+    y_message_sba = []
+    x_lst = [i for i in xrange(2, 16)]
+    print x_lst
     for i in x_lst:
         laplacian = build_line_laplacian(i)
+        print laplacian
         graph = setup_graph(laplacian)
         # get values for flooding
-        setup_sending_flooding(graph, i-1, 'flooding')
+
+        print 'flooding'
+        setup_sending_flooding(graph, i, 'flooding')
         flood_rebroadcast = get_num_sender(graph)
+        y_message_flood.append(get_message_counter(graph))
         # set all the sender flags to false again
         # so one can reuse the same graph
-        set_sender_false(graph)
         clear_graph_data(graph)
         # get values for ahbp
-        setup_sending_AHBP(graph, i-1)
+        print 'ahbp'
+        setup_sending_AHBP(graph, i)
         ahbp_rebroadcast = get_num_sender(graph)
-
-        set_sender_false(graph)
+        y_message_ahbp.append(get_message_counter(graph))
         clear_graph_data(graph)
 
-        setup_sending_SBA(graph, i-1, 'SBA')
+        print 'sba'
+        setup_sending_SBA(graph, i, 'SBA')
         sba_rebroadcast = get_num_sender(graph)
-        set_sender_false(graph)
+        y_message_sba.append(get_message_counter(graph))
         clear_graph_data(graph)
 
         y_flood.append(flood_rebroadcast)
         y_ahbp.append(ahbp_rebroadcast)
         y_sba.append(sba_rebroadcast)
 
-    fig, (ax1, ax2, ax3) = plt.subplots(3, sharex=True, sharey=True)
-    ax1.plot(x_lst, y_flood)
-    ax1.set_title('pure flooding')
+    # print y_message_ahbp
+    # print y_message_flood
+    # print y_flood
 
-    ax2.plot(x_lst, y_ahbp)
-    ax2.set_title('ad-hoc broadcast protocol')
+    fig = plt.figure(1)
+    plt.plot(x_lst, y_flood, label='flood', marker='o')
+    plt.plot(x_lst, y_ahbp, color='red', label='ahbp', marker='o')
+    plt.plot(x_lst, y_sba, color='green', label='sba', marker='o')
+    plt.legend(loc='upper left')
 
-    ax3.plot(x_lst, y_sba)
-    ax3.set_title('scalabe broadcast algorithm')
+    fig2 = plt.figure()
+    plt.plot(x_lst, y_message_flood, label='flood', marker='o')
+    plt.plot(x_lst, y_message_ahbp, color='red', label='ahbp', marker='o')
+    plt.plot(x_lst, y_message_sba, color='green', label='sba', marker='o')
+    plt.legend(loc='upper left')
 
     plt.show()
 
+    fig.savefig('line_rebroadcast.png')
+    fig2.savefig('line_message.png')
 
 def sender_plot():  # TODO add some other plots in this function
     """Plot the number of rebroadcasting nodes in the network
@@ -328,6 +360,9 @@ def sender_plot():  # TODO add some other plots in this function
     y_sba_mean = []
     y_deg_flood_ahbp = []
     y_deg_sba = []
+    y_message_flood = []
+    y_message_ahbp = []
+    y_message_sba = []
     y_connectivity_flood_ahbp = []
     y_conectitvity_sba = []
     for i in x_lst:
@@ -355,23 +390,21 @@ def sender_plot():  # TODO add some other plots in this function
             setup_sending_flooding(rand_graph, i-1, 'flooding')
             y_flood[a, i-2] = get_num_sender(rand_graph)
             flood_rebroadcast += get_num_sender(rand_graph)
+            y_message_flood.append(get_message_counter(rand_graph))
             # set all the sender flags to false again
             # so one can reuse the same graph
-            set_sender_false(rand_graph)
             clear_graph_data(rand_graph)
             # get values for ahbp
             setup_sending_AHBP(rand_graph, i-1)
             y_ahbp[a, i-2] = get_num_sender(rand_graph)
             ahbp_rebroadcast += get_num_sender(rand_graph)
-
-            set_sender_false(rand_graph)
+            y_message_ahbp.append(get_message_counter(rand_graph))
             clear_graph_data(rand_graph)
 
             setup_sending_SBA(rand_graph, i-1, 'SBA')
             y_sba[a, i-2] = get_num_sender(rand_graph)
             sba_rebroadcast += get_num_sender(rand_graph)
-
-            set_sender_false(rand_graph)
+            y_message_sba.append(get_message_counter(rand_graph))
             clear_graph_data(rand_graph)
             # since SBA has a random timer get some more samples for an accurate result
             for b in range(2):
@@ -392,12 +425,12 @@ def sender_plot():  # TODO add some other plots in this function
 
         y_deg_flood_ahbp.append(flood_ahbp_deg/float(samples))
         y_deg_sba.append(sba_deg/float(3*samples))
-    print np.std(y_flood, axis=1)
-    print y_ahbp
-    print y_sba
-    print y_flood_mean
-    print y_ahbp_mean
-    print y_sba_mean
+    # print np.std(y_flood, axis=1)
+    # print y_ahbp
+    # print y_sba
+    # print y_flood_mean
+    # print y_ahbp_mean
+    # print y_sba_mean
 
     # fig, (ax1, ax2, ax3) = plt.subplots(3, sharex=True, sharey=True)
     # # ax1.errorbar(x_lst, y_flood_mean, y_flood, ecolor='red')
@@ -429,10 +462,17 @@ def sender_plot():  # TODO add some other plots in this function
     axi2.plot(x_lst, y_deg_sba)
     axi2.set_title('average degree for sba graphs')
 
+    fig3 = plt.figure()
+    plt.plot(x_lst, y_message_flood, label='flood')
+    plt.plot(x_lst, y_message_ahbp, color='red', label='ahbp')
+    plt.plot(x_lst, y_message_sba, color='green', label='sba')
+    plt.legend()
+
     plt.show()
 
     fig.savefig('sender_plots.png')
     fig2.savefig('degree_plots.png')
+    fig3.savefig('message_plot.png')
 
 
 def lattice_graph(length):
@@ -539,8 +579,8 @@ ALLOWED_HELLO_LOSS = 1
 
 def main():
     """main function which performs the whole retransmission"""
-    # test_rebroadcasting()
-    sender_plot()
+    test_rebroadcasting()
+    # sender_plot()
     # # laplacian matrix -> has the information about the network-topology
     # graph_matrix = np.array([[ 3, -1,  0, -1, -1,  0,  0,  0,  0,  0,  0,  0,  0],
     #                          [-1,  3, -1, -1,  0,  0,  0,  0,  0,  0,  0,  0,  0],
