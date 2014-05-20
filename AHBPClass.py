@@ -6,27 +6,6 @@ is always passed as an argument -> calling_node
 import networkx as nx
 
 
-def build_2_hop(calling_node, graph):
-    """Build the two-hop neighborhood
-
-    It adds the 2-hop-neighborhood as a dictionary
-    to the calling_node attribute.
-
-    Arguments:
-    calling_node -- node whose neighborhood is desired
-    graph -- networkx.Graph object containing the graph topology
-
-    Return-type:
-    None
-    """
-    for node in graph.neighbors(calling_node):
-        two_hop_lst = []
-        for neigh in graph.neighbors(node):
-            if neigh != calling_node and neigh not in graph.neighbors(calling_node):
-                two_hop_lst.append(neigh)
-        calling_node.two_hop_dict[node] = two_hop_lst
-
-
 def del_brg(message):
     """deletes the BRG-Set in a node"""
     message.brg = []
@@ -36,7 +15,9 @@ def build_2_hop_graph(calling_node):
     """Build a graph containing 2-hop-neighborhood of calling_node
 
     With the 2-hop-neighborhood as a dictionary in the calling_node
-    build a graph of the neighborhood with Node instances
+    build a graph of the neighborhood with Node instances.
+    Need to take the same Node objects as the ones in the total graph,
+    in order to be able to check for Node objects in the graph.
 
     Arguments:
     calling_node -- node whose neighborhood is desired

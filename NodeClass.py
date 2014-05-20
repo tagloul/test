@@ -19,8 +19,8 @@ class Node(object):
     """
     obj_counter = 0  # in order to initiate the node.id
 
-# just cancelled out the arguments in the init method
-    def __init__(self): # , size, iteration): # just removed the number of iteration for the packet_history
+    # just cancelled out the arguments in the init method
+    def __init__(self):  # , size, iteration): # just removed the number of iteration for the packet_history
         """Initialize a node instance
 
         Note: each time a new node is initialized the obj_counter is incremented
@@ -59,6 +59,29 @@ class Node(object):
         self.two_hop_dict = {}
         # track the number of sent messages by the node
         self.message_counter = 0
+
+    def build_2_hop(self, graph):
+        """Build the two-hop neighborhood
+
+        It adds the 2-hop-neighborhood as a dictionary
+        to the calling_node attribute.
+        This topology information should acutally be gathered by the hello-messages.
+        For simplicity just take the information the hello-messages would
+        gather out of the total graph.
+
+        Arguments:
+        calling_node -- node whose neighborhood is desired
+        graph -- networkx.Graph object containing the graph topology
+
+        Return-type:
+        None
+        """
+        for node in graph.neighbors(self):
+            two_hop_lst = []
+            for neigh in graph.neighbors(node):
+                if neigh != self and neigh not in graph.neighbors(self):
+                    two_hop_lst.append(neigh)
+            self.two_hop_dict[node] = two_hop_lst
 
     def get_ID(self):
         """ID getter"""
@@ -128,7 +151,7 @@ class Node(object):
                 neighbor.receive_buffer[-1].last_node = self
                 # set the sender flag to true only for sending nodes
                 # which are not the source of the message
-                if item.origin != self.ID+1:
+                if item.origin != self.ID + 1:
                     self.sender = True
 
     def update_data(self, column, FLAG):
@@ -148,9 +171,9 @@ class Node(object):
                 self.data_stack.append(data)
                 if FLAG != "SBA":
                     self.sending_buffer.append(data)
-                # the value is stored in the row = to the origin of the packet
-                # row = data.origin - 1
-                # self.packet_history[row, column:] = data.value
+                    # the value is stored in the row = to the origin of the packet
+                    # row = data.origin - 1
+                    # self.packet_history[row, column:] = data.value
             elif boolean:
                 pass
 

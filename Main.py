@@ -10,6 +10,9 @@ import SBAClass as sba
 import AHBPClass as ahbp
 import random
 import numpy as np
+import collections
+from mpl_toolkits.mplot3d import axes3d
+from scipy.interpolate import griddata
 
 def get_message_counter(graph):
     """Compute the total number of sent messages in the network
@@ -126,7 +129,7 @@ def setup_sending_AHBP(graph, iteration):
         node.init_1_data()
         # only use this until hello protocol is implemented
         # this gets the 2-hop neighbor hood form the 'master'-graph
-        ahbp.build_2_hop(node, graph)
+        node.build_2_hop(graph)
         # with open("node_" + str(node.ID + 1) + '.txt', 'w') as outfile:
         #     outfile.write("new file for node :" + str(node.ID + 1) + "\n")
 
@@ -236,8 +239,8 @@ def random_graph(num_nodes):
     #         degree_lst = [random.randint(1,6) for i in range(num_nodes)]
     #         graph_bool = nx.is_graphical(degree_lst)
     #     gene_bool = False
-    #     # Use try here because sometimes an the graph can not be generated within 10 tries
-    #     # so try as long as it works
+    #     # Use try here because sometimes an the graph
+    #     # cannot be generated within 10 tries so try as long as it works
     #     while not gene_bool:
     #         try:
     #             graph = nx.random_degree_sequence_graph(degree_lst, tries=1000)
@@ -271,6 +274,108 @@ def build_line_laplacian(size):
         my_ar[i, i-1] = -1
         my_ar[i, i+1] = -1
     return my_ar
+
+
+def get_connectivity(laplacian):
+    """Compute the algebraic connectivity of a graph
+
+    Arguments:
+    laplacian -- Laplace matrix of a graph
+
+    Return-type:
+    connectivity -- float; algebraic connectivity
+    """
+    val, vec = np.linalg.eig(laplacian)
+    val.sort()
+    return val[1]
+
+
+def test_connectivity_degree():
+    conn_dict = {}
+    for i in range(1000):
+        graph, laplacian = random_graph(6)
+        con = get_connectivity(laplacian)
+        deg = average_degree(graph)
+        con = abs(con)
+        con = round(con, 3)
+        if con not in conn_dict:
+            conn_dict[con] = [0, 0]
+        conn_dict[con][0] += deg
+        conn_dict[con][1] += 1
+    for a in conn_dict:
+        conn_dict[a] = float(conn_dict[a][0]/conn_dict[a][1])
+
+    con_lst = collections.OrderedDict(sorted(conn_dict.items()))
+    print con_lst
+
+
+
+def test_connectivity():
+    conn_dict = {}
+    for i in range(1000):
+        graph, laplacian = random_graph(6)
+        con = get_connectivity(laplacian)
+        # Graph.print_graph(graph)
+        con = abs(con)
+        con = round(con, 3)
+        if con not in conn_dict:
+            conn_dict[con] = 0
+        conn_dict[con] += 1
+    con_lst = collections.OrderedDict(sorted(conn_dict.items()))
+    print con_lst
+
+
+def create_3d_plot(point_lst):
+    fig = plt.figure()
+    ax = fig.add_subplot(111, projection='3d')
+    X,Y,Z = zip(*point_lst)
+    yz = zip(Y,Z)
+    yz.sort()
+    Y = [y for (y,z) in yz]
+    Z = [z for (y,z) in yz]
+    grid_x, grid_y = np.meshgrid(X,Y)
+    print grid_x
+    print grid_y
+    points = np.array(zip(X,Y))
+    print points
+    Z = np.array(Z)
+    grid_z = griddata(points, Z, (grid_x, grid_y), method='linear')
+    print Z
+    print grid_z
+    print grid_z.shape
+    print grid_x.shape
+    print grid_y.shape
+    ax.plot_surface(grid_x, grid_y, grid_z)
+    # ax.plot(x,y,z)
+    plt.show()
+
+
+def test_3d_plot():
+    x_lst = [i for i in range(2, 10)]
+    point_lst_flood = []
+    point_lst_ahbp = []
+    point_lst_sba = []
+    samples = 1
+    for i in x_lst:
+        connectivity = 0
+        message_counter = 0
+        for a in range(samples):
+            graph, laplacian = random_graph(i)
+            setup_sending_flooding(graph, i, 'flooding')
+            connectivity = get_connectivity(laplacian)
+            message_counter = get_message_counter(graph)
+            point_lst_flood.append([i, connectivity, message_counter])
+            clear_graph_data(graph)
+
+            setup_sending_AHBP(graph, i)
+            message_counter = get_message_counter(graph)
+            point_lst_ahbp.append([i, connectivity, message_counter])
+            clear_graph_data(graph)
+
+            setup_sending_SBA(graph, i, 'SBA')
+            message_counter = get_message_counter(graph)
+            point_lst_sba.append([i, connectivity, message_counter])
+    create_3d_plot(point_lst_flood)
 
 
 def test_rebroadcasting():
@@ -406,7 +511,7 @@ def sender_plot():  # TODO add some other plots in this function
             sba_rebroadcast += get_num_sender(rand_graph)
             y_message_sba.append(get_message_counter(rand_graph))
             clear_graph_data(rand_graph)
-            # since SBA has a random timer get some more samples for an accurate result
+            # SBA has a random timer get some more samples for an accurate result
             for b in range(2):
                 rand_graph, laplacian = random_graph(i)
 
@@ -579,7 +684,10 @@ ALLOWED_HELLO_LOSS = 1
 
 def main():
     """main function which performs the whole retransmission"""
-    test_rebroadcasting()
+    # test_connectivity()
+    test_3d_plot()
+    # test_connectivity_degree()dimensions of matplotlib 3d plots arguments
+    # test_rebroadcasting()
     # sender_plot()
     # # laplacian matrix -> has the information about the network-topology
     # graph_matrix = np.array([[ 3, -1,  0, -1, -1,  0,  0,  0,  0,  0,  0,  0,  0],

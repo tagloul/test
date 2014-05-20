@@ -17,7 +17,7 @@ import math
 
 # packet_dict contains the iteration when the message was received and the actual iteration
 # it contains all messages in the data_stack which are currently processed by the SBAlgorithm
-def update_packet_dict(calling_node, iteration, graph):
+def update_packet_dict(calling_node, iteration):
 # TODO message problem
 # todo replace graph with two_hopdict
     """
@@ -38,6 +38,7 @@ def update_packet_dict(calling_node, iteration, graph):
     """
     packets_to_del = []
     for packet in calling_node.packet_dict:
+        packet_identifier = (packet.origin, packet.seq_number)
         # retreive times from the packet_dict
         t, start_iter = calling_node.packet_dict[packet]
         # check if random_timer expired
@@ -45,8 +46,8 @@ def update_packet_dict(calling_node, iteration, graph):
             # if expired delete it from the packet_dict
             packets_to_del.append(packet)
             # check for each node the calculated cover_set
-            for node in graph.neighbors_iter(calling_node):
-                bool_cs = node in calling_node.cover_dict[packet]
+            for node in calling_node.two_hop_dict:
+                bool_cs = node in calling_node.cover_dict[packet_identifier]
                 if not bool_cs:
                     break
             # cover-set != 2-hop neighborhood
@@ -56,13 +57,12 @@ def update_packet_dict(calling_node, iteration, graph):
                 calling_node.sending_buffer.append(packet)
         # if timer has not yet expired-> update cover_set
         else:
-            update_cover_set(calling_node, packet, graph)
+            update_cover_set(calling_node, packet)
     for pack in packets_to_del:
         del calling_node.packet_dict[pack]
 
 
 def check_packet_dict(calling_node, packet):
-    #TODO message problem
     """ checks if a package is known
 
     Return True if message is known and False if it is unknown
@@ -91,7 +91,7 @@ def check_packet_dict(calling_node, packet):
 
 
 def check_receive_buffer(calling_node, message, iteration, graph):
-#TODO messge problem
+# TODO message problem
 # todo replace graph by two_hop_dict
     """Perform the SBA for a message on the calling_node
 
@@ -112,21 +112,21 @@ def check_receive_buffer(calling_node, message, iteration, graph):
     bool_pd = check_packet_dict(calling_node, message)  # message in self.packet_dict
     # if the message is already known to the node just update the cover_set
     if bool_pd == True and bool_ds == True:
-        update_cover_set(calling_node, message, graph)
+        update_cover_set(calling_node, message)
     elif bool_pd == False and bool_ds == False:
         # check for this unknown message if the neighbors of the current node
         # are already covered by the last node
-        bool_neigh = check_neigh(calling_node, graph, message.last_node)
+        bool_neigh = check_neigh(calling_node, message.last_node)
         # if the are not known push this message into the packet_dict
         # and activate a random_timer
         if not bool_neigh:
             t = 0
-            #t = self.get_random_timer(graph)
+            t = get_random_timer(graph)
             calling_node.packet_dict[message] = (t, iteration)
-            update_cover_set(calling_node, message, graph)
+            update_cover_set(calling_node, message)
 
 
-def check_neigh(calling_node, graph, neigh):
+def check_neigh(calling_node, neigh):
     """Check if the own neighborhood is covered by the senders one
 
     Return False if there are node in the calling_node neighborhood
@@ -135,8 +135,10 @@ def check_neigh(calling_node, graph, neigh):
     Return-type:
     Boolean
     """
-    for node in graph.neighbors_iter(calling_node):
-        bool_value = (node in graph.neighbors(neigh) or node == neigh)
+    for node in calling_node.two_hop_dict:
+        bool_value = (node in neigh.two_hop_dict or node == neigh)
+        # if one node is not contained imediately leave for loop,
+        # since condition is then not met
         if bool_value == False:
             break
     return bool_value
@@ -172,10 +174,14 @@ def get_random_timer(calling_node, graph):
     return t
 
 
-def update_cover_set(calling_node, message, graph): # TODO
+def update_cover_set(calling_node, message): # TODO message problem # should be solved
     """update the cover_set for a message and its node
 
     If the message is not yet known create a new key in the cover_dict.
+    Note that as key one needs to take the message origin and seq_number
+    as unique identifier for the message.
+    Cannot take the message as key, since when a message is send to a neighbor
+    a copy of it will be saved. -> it is another object.
     If necessary add the message sender and its neighbors to the cover_dict values
 
     Arguments:
@@ -183,11 +189,15 @@ def update_cover_set(calling_node, message, graph): # TODO
     message -- message about which the operations are performed
     graph/two_hop_dict -- contains topology information
     """
-    if message not in calling_node.cover_dict:
-        calling_node.cover_dict[message] = []
+    identifier = (message.origin, message.seq_number)
+    message_node = message.last_node
 
-    if message.last_node not in calling_node.cover_dict[message]:
-        calling_node.cover_dict[message].append(message.last_node)
-    for neigh in graph.neighbors_iter(message.last_node):
-        if neigh not in calling_node.cover_dict[message]:
-            calling_node.cover_dict[message].append(neigh)
+    if identifier not in calling_node.cover_dict:
+        #
+        calling_node.cover_dict[(identifier)] = []
+
+    if message.last_node not in calling_node.cover_dict[identifier]:
+        calling_node.cover_dict[identifier].append(message.last_node)
+    for neigh in message_node.two_hop_dict:
+        if neigh not in calling_node.cover_dict[identifier]:
+            calling_node.cover_dict[identifier].append(neigh)
