@@ -104,12 +104,6 @@ class Node(object):
         Boolean
         """
         assert type(data) == pac.Packet
-        #======================================================================
-        # bool_data = data in self.data_stack
-        # return bool_data
-        #----------------------------------------------------------------------
-        # this does not work..
-        #======================================================================
         origin_check = 0
         seq_check = 0
         type_check = 0
@@ -164,13 +158,13 @@ class Node(object):
         column -- Iteration in which this method is called
         FLAG -- string - Aglorithm used
         """
-        for data in self.receive_buffer:
-            boolean = self.check_data_stack(data)
+        for message in self.receive_buffer:
+            boolean = self.check_data_stack(message)
             if not boolean:
-                data.add_to_path(self)
-                self.data_stack.append(data)
+                message.add_to_path(self)
+                self.data_stack.append(message)
                 if FLAG != "SBA":
-                    self.sending_buffer.append(data)
+                    self.sending_buffer.append(message)
                     # the value is stored in the row = to the origin of the packet
                     # row = data.origin - 1
                     # self.packet_history[row, column:] = data.value

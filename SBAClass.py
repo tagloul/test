@@ -18,8 +18,6 @@ import math
 # packet_dict contains the iteration when the message was received and the actual iteration
 # it contains all messages in the data_stack which are currently processed by the SBAlgorithm
 def update_packet_dict(calling_node, iteration):
-# TODO message problem
-# todo replace graph with two_hopdict
     """
     Update all messages with an active random timer
 
@@ -63,7 +61,8 @@ def update_packet_dict(calling_node, iteration):
 
 
 def check_packet_dict(calling_node, packet):
-    """ checks if a package is known
+    """
+    Gheck if a package is known
 
     Return True if message is known and False if it is unknown
 
@@ -91,9 +90,8 @@ def check_packet_dict(calling_node, packet):
 
 
 def check_receive_buffer(calling_node, message, iteration, graph):
-# TODO message problem
-# todo replace graph by two_hop_dict
-    """Perform the SBA for a message on the calling_node
+    """
+    Perform the SBA for a message on the calling_node
 
     First check if message is unknown and wether it already has an active random-timer or not
     Depending on the outcome of these checks either only update messages with random-timers
@@ -121,13 +119,14 @@ def check_receive_buffer(calling_node, message, iteration, graph):
         # and activate a random_timer
         if not bool_neigh:
             t = 0
-            t = get_random_timer(graph)
+            # t = get_random_timer(calling_node, graph)
             calling_node.packet_dict[message] = (t, iteration)
             update_cover_set(calling_node, message)
 
 
 def check_neigh(calling_node, neigh):
-    """Check if the own neighborhood is covered by the senders one
+    """
+    Check if the own neighborhood is covered by the senders one
 
     Return False if there are node in the calling_node neighborhood
     not covered by the senders neighborhood else return True
@@ -145,7 +144,8 @@ def check_neigh(calling_node, neigh):
 
 
 def get_random_timer(calling_node, graph):
-    """Compute the random-timer
+    """
+    Compute the random-timer
 
     Return an iteration_timestep from a uniform distribution defined by random_timer.
     -> random_timer is a design-parameter
@@ -161,7 +161,7 @@ def get_random_timer(calling_node, graph):
         # calculates the quotient T_0 of the 1 + max degree of neighbors
         # and 1 + degree of message receiver
     degree_neigh = 0
-    for neigh in graph.neighbors_iter(calling_node):
+    for neigh in calling_node.two_hop_dict:
         if graph.degree(neigh) > degree_neigh:
             degree_neigh = graph.degree(neigh)
     degree_node = graph.degree(calling_node)
@@ -174,8 +174,9 @@ def get_random_timer(calling_node, graph):
     return t
 
 
-def update_cover_set(calling_node, message): # TODO message problem # should be solved
-    """update the cover_set for a message and its node
+def update_cover_set(calling_node, message):
+    """
+    Update the cover_set for a message and its node
 
     If the message is not yet known create a new key in the cover_dict.
     Note that as key one needs to take the message origin and seq_number
