@@ -129,7 +129,7 @@ def iteration_plots(graph):
             axarr[row, col].set_xlim(0, x_lim)
             axarr[row, col].barh(y_pos, x_values, 0.4, align='center')
 
-    fig.savefig("iteration.png")
+    fig.savefig("iteration.svg")
 
 
 def print_graph(graph):
@@ -145,7 +145,7 @@ def print_graph(graph):
     nx.draw_networkx_labels(graph, pos, nodes_names)
     plt.title("graph topology: ")
     plt.show()
-    fig.savefig("graph.png")
+    fig.savefig("graph.svg")
 
 
 def print_all_data_stacks(graph):

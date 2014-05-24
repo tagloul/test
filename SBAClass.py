@@ -119,7 +119,7 @@ def check_receive_buffer(calling_node, message, iteration, graph):
         # and activate a random_timer
         if not bool_neigh:
             t = 0
-            # t = get_random_timer(calling_node, graph)
+            t = get_random_timer(calling_node, graph)
             calling_node.packet_dict[message] = (t, iteration)
             update_cover_set(calling_node, message)
 
@@ -169,8 +169,9 @@ def get_random_timer(calling_node, graph):
         # set the random time value for the argument of the
         # uniform-distribution
     # this is a tuning-parameter, which is still open
-    random_timer = 3
-    t = random.randint(0, math.ceil(T_0 * random_timer))
+    random_timer = 2
+    t=1
+    # t = random.randint(0, math.ceil(T_0 * random_timer))
     return t
 
 
