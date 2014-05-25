@@ -89,7 +89,7 @@ def check_packet_dict(calling_node, packet):
         return True
 
 
-def check_receive_buffer(calling_node, message, iteration, graph):
+def check_receive_buffer(calling_node, message, iteration, graph, timer):
     """
     Perform the SBA for a message on the calling_node
 
@@ -109,17 +109,16 @@ def check_receive_buffer(calling_node, message, iteration, graph):
     bool_ds = calling_node.check_data_stack(message)  # message in self.data_stack
     bool_pd = check_packet_dict(calling_node, message)  # message in self.packet_dict
     # if the message is already known to the node just update the cover_set
-    if bool_pd == True and bool_ds == True:
+    if bool_pd is True and bool_ds is True:
         update_cover_set(calling_node, message)
-    elif bool_pd == False and bool_ds == False:
+    elif bool_pd is False and bool_ds is False:
         # check for this unknown message if the neighbors of the current node
         # are already covered by the last node
         bool_neigh = check_neigh(calling_node, message.last_node)
         # if the are not known push this message into the packet_dict
         # and activate a random_timer
         if not bool_neigh:
-            t = 0
-            t = get_random_timer(calling_node, graph)
+            t = get_random_timer(calling_node, graph, timer)
             calling_node.packet_dict[message] = (t, iteration)
             update_cover_set(calling_node, message)
 
@@ -143,7 +142,7 @@ def check_neigh(calling_node, neigh):
     return bool_value
 
 
-def get_random_timer(calling_node, graph):
+def get_random_timer(calling_node, graph, timer_para):
     """
     Compute the random-timer
 
@@ -169,9 +168,9 @@ def get_random_timer(calling_node, graph):
         # set the random time value for the argument of the
         # uniform-distribution
     # this is a tuning-parameter, which is still open
-    random_timer = 2
-    t=1
-    # t = random.randint(0, math.ceil(T_0 * random_timer))
+    random_timer = timer_para
+    # t=1
+    t = random.randint(0, math.ceil(T_0 * random_timer))
     return t
 
 
@@ -196,7 +195,7 @@ def update_cover_set(calling_node, message):
 
     if identifier not in calling_node.cover_dict:
         #
-        calling_node.cover_dict[(identifier)] = []
+        calling_node.cover_dict[identifier] = []
 
     if message.last_node not in calling_node.cover_dict[identifier]:
         calling_node.cover_dict[identifier].append(message.last_node)

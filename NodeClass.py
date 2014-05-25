@@ -7,7 +7,6 @@
 import numpy as np
 import copy
 import random
-import this  # quit thinking about this module. too hard for you!!
 import Package as pac
 
 
@@ -48,7 +47,7 @@ class Node(object):
         self.__class__.obj_counter += 1
         self.sender = False
         # matrix which stores the info when a node receive a packet
-        # self.packet_history = np.zeros((size, iteration))
+        # self.packet_history = np.zeros((size, 1))
         self.flag = ""
         # is a dict for SBA; contains packets with an active random timer
         self.packet_dict = {}
@@ -58,7 +57,7 @@ class Node(object):
         # contains the two_hop-neighborhood. 1-hop are keys; 2-hop their values
         self.two_hop_dict = {}
         # track the number of sent messages by the node
-        self.message_counter = 0
+        self.message_counter = []
 
     def build_2_hop(self, graph):
         """Build the two-hop neighborhood
@@ -137,9 +136,10 @@ class Node(object):
         Argument:
         neighbor -- node instance
         """
+        counter = 0
         for item in self.sending_buffer:
             if neighbor != item.last_node:
-                self.message_counter += 1
+                counter += 1
                 # deepcopy guarantees everything is copied
                 neighbor.receive_buffer.append(copy.deepcopy(item))
                 neighbor.receive_buffer[-1].last_node = self
@@ -147,8 +147,9 @@ class Node(object):
                 # which are not the source of the message
                 if item.origin != self.ID + 1:
                     self.sender = True
+        self.message_counter.append(counter)
 
-    def update_data(self, column, FLAG):
+    def update_data(self, FLAG):
         """Check the receive_buffer for unknown messages
 
         Any unknown message will be appended to the data_stack of the node.
@@ -167,7 +168,9 @@ class Node(object):
                     self.sending_buffer.append(message)
                     # the value is stored in the row = to the origin of the packet
                     # row = data.origin - 1
-                    # self.packet_history[row, column:] = data.value
+                    # value to add
+                    # values = [ [data.value] for i in range(size)]
+                    # self.packet_history = np.concatenate(self.packet_history, values, axis=1)
             elif boolean:
                 pass
 

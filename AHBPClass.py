@@ -230,8 +230,9 @@ def check_receive_buffer(calling_node, column):
         if bool_ds == False:
             message.add_to_path(calling_node)
             calling_node.data_stack.append(message)
-            row = message.origin - 1
-            # calling_node.packet_history[row, column:] = message.value
+            # size = len(calling_node.packet_history)
+            # values = [ [message.value] for i in range(size)]
+            # calling_node.packet_history = np.concatenate(calling_node.packet_history, values, axis=1)
                 # if oneself is in the BRG-Set add it to the sending-list
             if calling_node.ID in message.brg:
                 # calling_node.sender = True
