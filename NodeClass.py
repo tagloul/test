@@ -11,7 +11,8 @@ import Package as pac
 
 
 class Node(object):
-    """cool class containing stuff related to nodes
+    """
+    Cool class containing stuff related to nodes
 
     class attributes:
     obj_counter -- counter in order to get for every node a different ID
@@ -20,7 +21,8 @@ class Node(object):
 
     # just cancelled out the arguments in the init method
     def __init__(self):  # , size, iteration): # just removed the number of iteration for the packet_history
-        """Initialize a node instance
+        """
+        Initialize a node instance
 
         Note: each time a new node is initialized the obj_counter is incremented
 
@@ -60,7 +62,8 @@ class Node(object):
         self.message_counter = []
 
     def build_2_hop(self, graph):
-        """Build the two-hop neighborhood
+        """
+        Build the two-hop neighborhood
 
         It adds the 2-hop-neighborhood as a dictionary
         to the calling_node attribute.
@@ -95,7 +98,8 @@ class Node(object):
         self._data_stack = data_list
 
     def check_data_stack(self, data):
-        """ checks if a message is known
+        """
+        Check if a message is known
 
         Returns  True if the message is already known and False if it is unknown
 
@@ -131,7 +135,8 @@ class Node(object):
         self.receive_buffer = []
 
     def send_to_neighbor(self, neighbor):
-        """Push the sending_buffer to the receive_buffer of the neighbor
+        """
+        Push the sending_buffer to the receive_buffer of the neighbor
 
         Argument:
         neighbor -- node instance
@@ -150,7 +155,8 @@ class Node(object):
         self.message_counter.append(counter)
 
     def update_data(self, FLAG):
-        """Check the receive_buffer for unknown messages
+        """
+        Check the receive_buffer for unknown messages
 
         Any unknown message will be appended to the data_stack of the node.
         Depending on the Algorithm used, it may also be added to the sending_buffer.
@@ -175,7 +181,8 @@ class Node(object):
                 pass
 
     def init_1_data(self):
-        """Create a data-message and append it to the node
+        """
+        Create a data-message and append it to the node
 
         New message with sequence number 1, origin = ID
         and last_node equals oneself
