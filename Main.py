@@ -58,7 +58,7 @@ def get_message_counter(graph):
             max_number = max(node.message_counter)
         for number in node.message_counter:
             total_number += number
-
+    # delete comment for use later
     return total_number # , max_number
 
 def setup_sending_flooding(graph, FLAG):
