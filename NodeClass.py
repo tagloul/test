@@ -52,11 +52,12 @@ class Node(object):
         # self.packet_history = np.zeros((size, 1))
         self.flag = ""
         # is a dict for SBA; contains packets with an active random timer
+        # their cover-set is stored in the cover_dict
         self.packet_dict = {}
-        # cover-set for SBA; keys are the covered 1-hop neighbors
-        # and the values are their neighbors
+        # cover-set for SBA; keys are messages
+        # and the values are the covered nodes
         self.cover_dict = {}
-        # contains the two_hop-neighborhood. 1-hop are keys; 2-hop their values
+        # contains the two_hop-neighborhood. 1-hop are keys; 2-hop neigh their values
         self.two_hop_dict = {}
         # track the number of sent messages by the node
         self.message_counter = []
@@ -107,20 +108,19 @@ class Node(object):
         Boolean
         """
         assert type(data) == pac.Packet
-        origin_check = 0
-        seq_check = 0
-        type_check = 0
         for item in self.data_stack:
+            origin_check = 0
+            seq_check = 0
+            type_check = 0
             if data.origin == item.origin:
                 origin_check = 1
             if data.type == item.type:
                 type_check = 1
             if data.seq_number == item.seq_number:
                 seq_check = 1
-        if origin_check == 0 or seq_check == 0 or type_check == 0:
-            return False
-        else:
-            return True
+            if origin_check == 1 and seq_check == 1 and type_check == 1:
+                return True
+        return False
 
     def del_data_stack(self):
         """Delete the data_stack of a node"""
