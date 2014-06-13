@@ -23,7 +23,7 @@ import math
 class PlotBars(object):
     """A plotbar object stands for a node to be plotted"""
     def __init__(self, bars):
-        """Bars is a rectangle object form matplotlib."""
+        """Bars is a rectangle object form matplotlib"""
         self._bar = bars
 
     def set_width(self, width):

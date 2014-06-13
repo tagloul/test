@@ -134,25 +134,33 @@ class Node(object):
         """Delete the receive_buffer"""
         self.receive_buffer = []
 
-    def send_to_neighbor(self, neighbor):
+    def send_to_neighbor(self, neighbors):
         """
         Push the sending_buffer to the receive_buffer of the neighbor
 
+        Push each message in the sending_buffer to every node in the neighbors list.
+        Neglect for each message its last node.
+        All ports except the one through which the message came in have to
+        process the message. Thus add 5 to the message counter.
+
         Argument:
-        neighbor -- node instance
+        neighbors -- node instances
         """
-        counter = 0
         for item in self.sending_buffer:
-            if neighbor != item.last_node:
-                counter += 1
-                # deepcopy guarantees everything is copied
-                neighbor.receive_buffer.append(copy.deepcopy(item))
-                neighbor.receive_buffer[-1].last_node = self
-                # set the sender flag to true only for sending nodes
-                # which are not the source of the message
-                if item.origin != self.ID + 1:
-                    self.sender = True
-        self.message_counter.append(counter)
+            counter = 0
+            for neighbor in neighbors:
+                if neighbor != item.last_node:
+                    counter += 1
+                    # deepcopy guarantees everything is copied
+                    neighbor.receive_buffer.append(copy.deepcopy(item))
+                    neighbor.receive_buffer[-1].last_node = self
+                    # set the sender flag to true only for sending nodes
+                    # which are not the source of the message
+                    if item.origin != self.ID + 1:
+                        self.sender = True
+            if counter != 0:
+                # append 5 for each message in the sending_buffer
+                self.message_counter.append(5)
 
     def update_data(self, FLAG):
         """
