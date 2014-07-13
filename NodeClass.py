@@ -20,9 +20,12 @@ class Node(object):
     obj_counter = 0  # in order to initiate the node.id
 
 <<<<<<< HEAD
+<<<<<<< HEAD
     def __init__(self, size, iteration): # just removed the number of iteration for the packet_history
         # threading.Thread.__init__(self, name=self.__class__.obj_counter])
 =======
+=======
+>>>>>>> sender_plot
     # just cancelled out the arguments in the init method
     def __init__(self):  # , size, iteration): # just removed the number of iteration for the packet_history
         """
@@ -46,6 +49,9 @@ class Node(object):
         update_data -- check the receive_buffer for unknown messages
         init_1_data -- initiate the nodes with a message
         """
+<<<<<<< HEAD
+>>>>>>> sender_plot
+=======
 >>>>>>> sender_plot
         self._ID = self.__class__.obj_counter
         self._data_stack = []
@@ -66,6 +72,7 @@ class Node(object):
         self.two_hop_dict = {}
         # track the number of sent messages by the node
         self.message_counter = []
+<<<<<<< HEAD
 
     def build_2_hop(self, graph):
         """
@@ -95,6 +102,37 @@ class Node(object):
         """ID getter"""
         return self._ID
 
+=======
+
+    def build_2_hop(self, graph):
+        """
+        Build the two-hop neighborhood
+
+        It adds the 2-hop-neighborhood as a dictionary
+        to the calling_node attribute.
+        This topology information should acutally be gathered by the hello-messages.
+        For simplicity just take the information the hello-messages would
+        gather out of the total graph.
+
+        Arguments:
+        calling_node -- node whose neighborhood is desired
+        graph -- networkx.Graph object containing the graph topology
+
+        Return-type:
+        None
+        """
+        for node in graph.neighbors(self):
+            two_hop_lst = []
+            for neigh in graph.neighbors(node):
+                if neigh != self and neigh not in graph.neighbors(self):
+                    two_hop_lst.append(neigh)
+            self.two_hop_dict[node] = two_hop_lst
+
+    def get_ID(self):
+        """ID getter"""
+        return self._ID
+
+>>>>>>> sender_plot
     def get_data_stack(self):
         """data_stack getter"""
         return self._data_stack
@@ -185,22 +223,29 @@ class Node(object):
                 self.data_stack.append(message)
                 if FLAG != "SBA":
 <<<<<<< HEAD
+<<<<<<< HEAD
                     self.sending_buffer.append(data)
                 # the value is stored in the row = to the origin of the packet
                 # row = data.origin - 1
                 # self.packet_history[row, column:] = data.value
 =======
+=======
+>>>>>>> sender_plot
                     self.sending_buffer.append(message)
                     # the value is stored in the row = to the origin of the packet
                     # row = data.origin - 1
                     # value to add
                     # values = [ [data.value] for i in range(size)]
                     # self.packet_history = np.concatenate(self.packet_history, values, axis=1)
+<<<<<<< HEAD
+>>>>>>> sender_plot
+=======
 >>>>>>> sender_plot
             elif boolean:
                 pass
 
     def init_1_data(self):
+<<<<<<< HEAD
 <<<<<<< HEAD
         """ creates one package of type height and appends it to
         the data_stack and sending_buffer"""
@@ -210,6 +255,8 @@ class Node(object):
         self.sending_buffer.append(new_package)
         # self.packet_history[self.ID, :] = new_package.value
 =======
+=======
+>>>>>>> sender_plot
         """
         Create a data-message and append it to the node
 
@@ -223,6 +270,9 @@ class Node(object):
         self.data_stack.append(new_packet)
         self.sending_buffer.append(new_packet)
         # self.packet_history[self.ID, :] = new_packet.value
+<<<<<<< HEAD
+>>>>>>> sender_plot
+=======
 >>>>>>> sender_plot
 
     def init_data(self):  # todo find a way to eliminate these if statements
@@ -257,6 +307,7 @@ class Node(object):
                         if item.seq_number > max_seq:
                             max_seq = item.seq_number
 <<<<<<< HEAD
+<<<<<<< HEAD
                 new_package = pac.Package(data, max_seq + 1, self.ID, "velocity")
                 new_package.add_to_path(self)
             self.data_stack.append(new_package)
@@ -276,11 +327,16 @@ class Node(object):
 
     sent = property(get_sent, set_sent)
 =======
+=======
+>>>>>>> sender_plot
                 new_packet = pac.Packet(data, max_seq + 1, self.ID, "velocity")
                 new_packet.add_to_path(self)
             self.data_stack.append(new_packet)
             self.sending_buffer.append(new_packet)
 
+<<<<<<< HEAD
+>>>>>>> sender_plot
+=======
 >>>>>>> sender_plot
     ID = property(get_ID)
     data_stack = property(get_data_stack, set_data_stack)

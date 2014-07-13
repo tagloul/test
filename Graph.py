@@ -144,9 +144,15 @@ def print_graph(graph):
     # draw the label with the nodes_names containing the name attribute
     nx.draw_networkx_labels(graph, pos, nodes_names)
 <<<<<<< HEAD
+<<<<<<< HEAD
     plt.title("graph topology")
     plt.show()
     # fig.savefig("graph.png")
+=======
+    plt.title("graph topology: ")
+    plt.show()
+    fig.savefig("graph.svg")
+>>>>>>> sender_plot
 =======
     plt.title("graph topology: ")
     plt.show()
