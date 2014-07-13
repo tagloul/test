@@ -104,18 +104,8 @@ def setup_sending_flooding(graph):
     iteration = 0
     while not check_nodes(graph):
         for node in graph.nodes():
-<<<<<<< HEAD
-<<<<<<< HEAD
-            for neigh in graph.neighbors_iter(node):
-                node.send_to_neighbor(neigh)
-=======
             # check if node rebroadcasts any messages
             node.send_to_neighbor(graph.neighbors(node))
->>>>>>> sender_plot
-=======
-            # check if node rebroadcasts any messages
-            node.send_to_neighbor(graph.neighbors(node))
->>>>>>> sender_plot
         # before updating the sending_buffer delete already sent data
         # after update del receive_buffer not to check already known data twice
         for node in graph.nodes():
@@ -132,7 +122,6 @@ def setup_sending_flooding(graph):
 def setup_sending_SBA(graph, timer):
     """
     Perform the sending process according to the SBA
-<<<<<<< HEAD
 
     Iterates through all nodes in the graph.
     The sending part and message-updating part are split.
@@ -146,21 +135,6 @@ def setup_sending_SBA(graph, timer):
     iteration -- number of iteration done during the sending
     FLAG -- string which indicates the broadcast algorithm
 
-=======
-
-    Iterates through all nodes in the graph.
-    The sending part and message-updating part are split.
-    -> a message is not rebroadcasted mulitpletimes in the same iteration
-    Message-updating:
-    - Check vertex-message pairs with an active random timer
-    - After sending check the receive-buffer for unknown messages
-
-    Arguments:
-    graph -- a graph with node instances as vertices
-    iteration -- number of iteration done during the sending
-    FLAG -- string which indicates the broadcast algorithm
-
->>>>>>> sender_plot
     Return-type:
     none
     """
@@ -174,24 +148,6 @@ def setup_sending_SBA(graph, timer):
     iteration = 0
     while not check_nodes(graph):
         for node in graph.nodes():
-<<<<<<< HEAD
-<<<<<<< HEAD
-            sba.update_packet_dict(node, i, graph)
-
-        # forward packet in the sending list to neighbors
-        for node in graph.nodes():
-            for neigh in graph.neighbors_iter(node):
-                node.send_to_neighbor(neigh)
-
-        # checks incoming packets if they are already known and adds
-        # them if necessary to the packet dict and activates a timer
-        for node in graph.nodes():
-            for packet in node.receive_buffer:
-                sba.check_receive_buffer(node, packet, i, graph)
-        # before updating the sending_buffer delete already sent data
-        # after update del receive_buffer not to check already known data twice
-        for node in graph.nodes():
-=======
             sba.check_receive_buffer(node, iteration, timer)
         for node in graph.nodes():
             sba.update_packet_dict(node, iteration)
@@ -199,48 +155,14 @@ def setup_sending_SBA(graph, timer):
         for node in graph.nodes():
             # check if node rebroadcasts any messages
             node.send_to_neighbor(node.two_hop_dict.keys())
->>>>>>> sender_plot
-=======
-            sba.check_receive_buffer(node, iteration, timer)
-        for node in graph.nodes():
-            sba.update_packet_dict(node, iteration)
-        # forward packet in the sending list to neighbors
-        for node in graph.nodes():
-            # check if node rebroadcasts any messages
-            node.send_to_neighbor(node.two_hop_dict.keys())
->>>>>>> sender_plot
             node.del_sending_buffer()
-        # # checks incoming packets if they are already known and adds
-        # # them if necessary to the packet dict and activates a timer
-        # for node in graph.nodes():
-        #     for packet in node.receive_buffer:
-        #         sba.check_receive_buffer(node, packet, iteration, graph, timer)
-        # # before updating the sending_buffer delete already sent data
-        # # after update del receive_buffer not to check already known data twice
-        # for node in graph.nodes():
-        #     node.del_sending_buffer()
-        #     node.update_data(flag)
-        #     node.del_receive_buffer()
+
         iteration += 1
     for node in graph.nodes():
         node.send_to_neighbor(graph.neighbors(node))
     return iteration
-<<<<<<< HEAD
 
 
-def setup_sending_AHBP(graph):
-    """
-    Perfrom the sending process according to the AHBP
-=======
->>>>>>> sender_plot
-
-    Iterates through all nodes in the graph.
-    The sending part and message-updating part are split.
-    -> a message is not rebroadcasted mulitpletimes in the same iteration
-    Message-updating:Check the receive-buffer and if needed build the BRG-set
-
-<<<<<<< HEAD
-=======
 def setup_sending_AHBP(graph):
     """
     Perfrom the sending process according to the AHBP
@@ -250,11 +172,9 @@ def setup_sending_AHBP(graph):
     -> a message is not rebroadcasted mulitpletimes in the same iteration
     Message-updating:Check the receive-buffer and if needed build the BRG-set
 
->>>>>>> sender_plot
     Arguments:
     graph -- a graph with node instances as vertices
     iteration -- number of iteration done during the sending
-    timer -- parameter for the random-timer
 
     Return-type:
     none
@@ -287,42 +207,6 @@ def setup_sending_AHBP(graph):
 
         # rebroadcast the messages in the sending_buffer to the neighbors
         for node in graph.nodes_iter():
-<<<<<<< HEAD
-<<<<<<< HEAD
-            for neigh in node.two_hop_dict:
-                node.send_to_neighbor(neigh)
-=======
-=======
-            # check if node rebroadcasts any messages
-            node.send_to_neighbor(node.two_hop_dict.keys())
-            node.del_sending_buffer()
-        iteration += 1
-    for node in graph.nodes():
-        node.send_to_neighbor(graph.neighbors(node))
-
-
-def setup_sending_half_sba(graph):
-    """
-    Perform the sending process according to parts of the SBA
-
-
-    The parts with the random are cut out.
-    Besides that everything is the same as in the complete SBA
-
-    Arguments:
-    graph -- networkx.Graph instance; contains the whole network
-
-    Return-type:
-    None
-    """
-    for node in graph.nodes():
-        node.init_1_data()
-        node.build_2_hop(graph)
-
-    iteration = 0
-    while not check_nodes(graph):
-        for node in graph.nodes():
->>>>>>> sender_plot
             # check if node rebroadcasts any messages
             node.send_to_neighbor(node.two_hop_dict.keys())
             node.del_sending_buffer()
@@ -354,22 +238,8 @@ def setup_sending_half_sba(graph):
         for node in graph.nodes():
             # check if node rebroadcasts any messages
             node.send_to_neighbor(node.two_hop_dict.keys())
->>>>>>> sender_plot
             node.del_sending_buffer()
 
-        for node in graph.nodes_iter():
-            for message in node.receive_buffer:
-                boolean = node.check_data_stack(message)
-                if not boolean:
-                    message.add_to_path(node)
-                    node.data_stack.append(message)
-                    if not sba.check_neigh(node, message.last_node):
-                       node.sending_buffer.append(message)
-
-            node.del_receive_buffer()
-        iteration += 1
-    for node in graph.nodes():
-        node.send_to_neighbor(graph.neighbors(node))
 
         for node in graph.nodes_iter():
             for message in node.receive_buffer:
@@ -403,18 +273,8 @@ def setup_graph(laplacian):
     size = len(laplacian[0, :])
     my_graph = nx.Graph()
     for i in range(size):
-<<<<<<< HEAD
-<<<<<<< HEAD
-        my_graph.add_node(nde.Node(size, iter_num), name=str(i + 1))
-=======
         # depending on the mode add the arguments in the node initiator
         my_graph.add_node(nde.Node(), name=str(i + 1), color='blue')
->>>>>>> sender_plot
-=======
-        # depending on the mode add the arguments in the node initiator
-        my_graph.add_node(nde.Node(), name=str(i + 1), color='blue')
->>>>>>> sender_plot
-        #my_graph.add_node(nde.Node(size, iteration), name=str(i + 1))
     # stores the nodes and their name attributes in a dictionary
     nodes_names = nx.get_node_attributes(my_graph, "name")
     # switches key and values--> thus names_nodes
@@ -432,35 +292,20 @@ def setup_graph(laplacian):
 
 
 def create_figure(graph):
-<<<<<<< HEAD
-<<<<<<< HEAD
-    """TODO"""
-=======
     """Call other functions to create the plots"""
->>>>>>> sender_plot
-=======
-    """Call other functions to create the plots"""
->>>>>>> sender_plot
+
     Graph.iteration_plots(graph)
 
     # creates all the animated plots for the nodes
-    size = len(graph.nodes())
-    for i in range(size):
-        fig = plt.figure()
-        Graph.bar_plot(graph, i + 1, fig)
+    # size = len(graph.nodes())
+    # for i in range(size):
+    #     fig = plt.figure()
+    #     Graph.bar_plot(graph, i + 1, fig)
 
     print 'check plot generating'
 
 
-<<<<<<< HEAD
-<<<<<<< HEAD
-ITERATION = 10
-FLAG = ""
-HELLO_INTERVAL = 3
-ALLOWED_HELLO_LOSS = 1
-=======
-=======
->>>>>>> sender_plot
+
 def get_num_sender(graph):
     """Iterate through graph and count true sender flags"""
     rebroadcaster = 0
@@ -487,7 +332,6 @@ def clear_graph_data(graph):
         node.del_data_stack()
         node.sender = False
         node.message_counter = []
-<<<<<<< HEAD
 
 
 def random_graph(num_nodes):
@@ -511,31 +355,6 @@ def build_line_laplacian(size):
         my_ar[i, i+1] = -1
     return my_ar
 
-=======
-
-
-def random_graph(num_nodes):
-    laplacian_array = build_rand_graph(num_nodes)
-    rand_graph = setup_graph(laplacian_array)
-    return rand_graph, laplacian_array
-
-
-def build_line_laplacian(size):
-    """
-    Build laplacian of line-graph and return it as numpy.array"""
-    my_ar = np.eye(size)
-    if size == 2:
-        my_ar = np.array([[1, -1],
-                          [-1, 1]])
-    for i in range(1, size-1):
-        my_ar[i, i] += 1
-        my_ar[i-1, i] = -1
-        my_ar[i+1, i] = -1
-        my_ar[i, i-1] = -1
-        my_ar[i, i+1] = -1
-    return my_ar
-
->>>>>>> sender_plot
 
 def get_connectivity(laplacian):
     """
@@ -818,7 +637,6 @@ def buffer_plots():
             messages, max_mes_flood = get_message_counter(graph)
             rebroadcaster = get_num_sender(graph)
             flood_rebroad, flood_mes, flood_max = update_dict(flood_mes, flood_rebroad, flood_max, conn, rebroadcaster, messages, max_mes_flood)
-<<<<<<< HEAD
             # set all the sender flags to false again
             # so one can reuse the same graph
             clear_graph_data(graph)
@@ -931,127 +749,10 @@ def test_plots():
             messages, max_mes = get_message_counter(graph)
             rebroadcaster = get_num_sender(graph)
             flood_rebroad, flood_mes, flood_max = update_dict(flood_mes, flood_rebroad, flood_max, conn, rebroadcaster, messages, max_mes)
-=======
->>>>>>> sender_plot
             # set all the sender flags to false again
             # so one can reuse the same graph
             clear_graph_data(graph)
             # get values for AHBP
-<<<<<<< HEAD
-=======
-            setup_sending_AHBP(graph)
-            rebroadcaster = get_num_sender(graph)
-            messages, max_mes = get_message_counter(graph)
-            if max_mes == max_mes_flood:
-                max_mes = 0
-            ahbp_rebroad, ahbp_mes, ahbp_max = update_dict(ahbp_mes, ahbp_rebroad, ahbp_max, conn, rebroadcaster, messages, max_mes)
-            clear_graph_data(graph)
-            # get values for SBA
-            iteration = setup_sending_SBA(graph, 2)
-            rebroadcaster = get_num_sender(graph)
-            messages, max_mes = get_message_counter(graph)
-            if max_mes == max_mes_flood:
-                max_mes = 0
-            sba_rebroad, sba_mes, sba_max = update_dict(sba_mes, sba_rebroad, sba_max, conn, rebroadcaster, messages, max_mes)
-            clear_graph_data(graph)
-
-        flood_max, ahbp_max, sba_max = arrange_data(flood_max, ahbp_max, sba_max)
-        flood_conn = flood_max.keys()
-        flood_y = flood_max.values()
-        flood_x = []
-        for i in range(len(flood_conn)):
-            for j in range(len(flood_y[i])):
-                flood_x.append(flood_conn[i])
-        flood_y = list(it.chain.from_iterable(flood_y))
-        ax.plot(flood_x, flood_y, linestyle='None', marker='o', color='blue')
-        ahbp_conn = ahbp_max.keys()
-        ahbp_y = ahbp_max.values()
-        ahbp_x = []
-        for i in range(len(ahbp_conn)):
-            for j in range(len(ahbp_y[i])):
-                ahbp_x.append(ahbp_conn[i])
-        ahbp_y = list(it.chain.from_iterable(ahbp_y))
-        ax.plot(ahbp_x, ahbp_y, linestyle='None', marker='s', color='red')
-        sba_conn =sba_max.keys()
-        sba_y = sba_max.values()
-        sba_x = []
-        for i in range(len(sba_conn)):
-            for j in range(len(sba_y[i])):
-                sba_x.append(sba_conn[i])
-        sba_y = list(it.chain.from_iterable(sba_y))
-        ax.plot(sba_x, sba_y, linestyle='None', marker='D', color='orange')
-        ax.set_title('Graph size: {0}'.format(x_lst[size]),fontsize=24, fontweight='bold')
-        plt.setp(ax.get_xticklabels(), fontsize=22, fontstyle='oblique')
-        plt.setp(ax.get_yticklabels(), fontsize=22, fontstyle='oblique')
-    # sometimes one needs to hack a lil bit
-    # access the matplotlib.line objects through it
-        lines = fig._axstack._elements[0][1][1].lines
-        ax.legend((lines[0], lines[1], lines[2]),
-                ('flood', 'ahbp', 'sba'), loc=4, prop={'size':20})
-    # print lines
-    fig.text(0.5, 0.05, 'Algebraic connectivity', style='oblique', size=24, fontweight='semibold', horizontalalignment='center')
-    fig.text(0.05, 0.5, 'Max. Messages', style='oblique', size=24, fontweight='semibold', rotation='vertical', verticalalignment='center')
-    # ax.legend((lines[0], lines[1], lines[2]),
-    #             ('flood', 'ahbp', 'sba'), loc=4, prop={'size':20})
-    # plt.show()
-
-
-def test_plots():
-    # max_size = 1
-    samples = 50
-
-    # x_lst = [i for i in range(2, max_size+1)]
-
-    x_lst = [5, 6, 7]
-
-    fig1 = plt.figure('Total messages')
-    fig2 = plt.figure('Number of rebroadcaster')
-    # fig3 = plt.figure('Max buffer-length')
-
-    for size in range(len(x_lst)):
-        print x_lst[size]
-        if len(x_lst) == 1:
-            ax1 = fig1.add_subplot(1, 1, size + 1)
-            ax2 = fig2.add_subplot(1, 1, size + 1)
-        else:
-            ax1 = fig1.add_subplot(round(len(x_lst)/2, 0), 2, size + 1)
-            ax2 = fig2.add_subplot(round(len(x_lst)/2, 0), 2, size + 1)
-        # ax3 = fig3.add_subplot(max_size/2, 2, size-1)
-
-        flood_mes = {}
-        ahbp_mes = {}
-        sba_mes = {}
-
-        flood_rebroad = {}
-        ahbp_rebroad = {}
-        sba_rebroad = {}
-
-        flood_max = {}
-        ahbp_max = {}
-        sba_max = {}
-
-        # for a in range(samples):
-        for a in range(samples):
-            conn = -1
-            while conn < 0:
-                graph, laplacian = random_graph(x_lst[size])
-                if x_lst[size] > 20:
-                    conn = round(get_connectivity(laplacian), 4)
-                elif x_lst[size] == 20:
-                    conn = round(get_connectivity(laplacian), 3)
-                else:
-                    conn = round(get_connectivity(laplacian), 2)
-            # get values for flooding
-            print 'flooding'
-            setup_sending_flooding(graph)
-            messages, max_mes = get_message_counter(graph)
-            rebroadcaster = get_num_sender(graph)
-            flood_rebroad, flood_mes, flood_max = update_dict(flood_mes, flood_rebroad, flood_max, conn, rebroadcaster, messages, max_mes)
-            # set all the sender flags to false again
-            # so one can reuse the same graph
-            clear_graph_data(graph)
-            # get values for AHBP
->>>>>>> sender_plot
             print 'ahbp'
             setup_sending_AHBP(graph)
             rebroadcaster = get_num_sender(graph)
@@ -1104,9 +805,6 @@ def test_plots():
               fontweight='semibold', size=24, horizontalalignment='center')
     fig1.text(0.05, 0.5, 'Total number of messages', style='oblique',
               fontweight='semibold', size=24, rotation='vertical', verticalalignment='center')
-<<<<<<< HEAD
-=======
-
     fig2.text(0.5, 0.05, 'Algebraic Connectivity', style='oblique',
               fontweight='semibold', size=24, horizontalalignment='center')
     fig2.text(0.05, 0.5, 'Retransmitting nodes', style='oblique',
@@ -1116,114 +814,6 @@ def test_plots():
     # plt.show()
 
 
-def lattice_graph(length):
-    """
-    Build a hexagonally gridded graph of a square shaped form
-
-    The grid has a squared shape of size = length.
-    First create a square grid graph then add edges on the diagonals.
-
-    Arguments:
-    length -- integer determining the size of the square
-
-    Return-type:
-    graph -- networkx.Graph object
-    """
-    # builds a square grid graph
-    graph = nx.grid_2d_graph(length, length)
-    # in each square add an edge on the diagonal -> hexagonal shape
-    # add edges to seperate list, cuz cannot modifiy the graph during iteration
-    edge_lst = []
-    for n in graph:
-        x, y = n
-        if y > 0 and x < length-1:
-            edge_lst.append((n, (x+1, y-1)))
-    graph.add_edges_from(edge_lst)
-    return graph
->>>>>>> sender_plot
-
-    fig2.text(0.5, 0.05, 'Algebraic Connectivity', style='oblique',
-              fontweight='semibold', size=24, horizontalalignment='center')
-    fig2.text(0.05, 0.5, 'Retransmitting nodes', style='oblique',
-              fontweight='semibold', size=24, rotation='vertical', verticalalignment='center')
-    # fig3.legend((lines3[2], lines3[5], lines3[8], lines3[11]),
-    #             ('flood', 'ahbp', 'half_sba', 'sba'), 'lower right')
-    # plt.show()
-
-def build_rand_graph(num_nodes):
-    """
-    Build the DFA-like random graph
-
-    First build a hexagonally gridded graph -> call 'lattice_graph()'
-    Then delete random nodes till num_nodes nodes remain.
-    If deleting a node results in cutting the graph into mutliple components
-    check if one of the subgraphs has still enough vertices.
-    Continue computation with this subgraph.
-    Else delete another vertex.
-    Return the laplacian representation of the graph
-
-    Arguments:
-    num_nodes -- number of nodes the resulting graph should have
-
-    Return-type:
-    laplacian-matrix -- numpy array
-    """
-    # root = math.sqrt(num_nodes)
-    # length = int(math.ceil(root))
-    graph = lattice_graph(num_nodes)
-    # for node_name in graph.node:
-    #     graph.node[node_name]['color'] = 'red'
-    # pos = nx.spring_layout(graph)
-    while len(graph) > num_nodes:
-        # as long as the graph is not connect
-        # after removing a node try another one
-        connect_bool = False
-        while not connect_bool:
-            node_index = random.randint(0, len(graph)-1)
-            removed_node = graph.nodes()[node_index]
-            removed_edges = graph.edges(removed_node)
-            # graph.node[removed_node]['color'] = 'blue'
-            # colors = []
-            # for node_name in graph.node:
-            #     colors.append(graph.node[node_name]['color'])
-            # nx.draw(graph,pos, node_color=colors)
-            # plt.show()
-            graph.remove_node(removed_node)
-            # check if graph is still connected
-            connect_bool = nx.is_connected(graph)
-            if not connect_bool:
-                sub_graphs_worked = False
-                sub_graphs = nx.connected_component_subgraphs(graph)
-                for sub in sub_graphs:
-                    if len(sub) >= num_nodes:
-                        sub_graphs_worked = True
-                        break
-                if sub_graphs_worked:
-                    # for node_name in sub:
-                    #     graph.node[node_name]['color'] = 'blue'
-                    # colors = []
-                    # for node_name in graph.node:
-                    #     colors.append(graph.node[node_name]['color'])
-                    # nx.draw(graph,pos, node_color=colors)
-                    # plt.show()
-                    # take on purpose the last sub element from the for-loop
-                    graph = sub
-                    connect_bool = True
-                    # for node_name in graph.node:
-                    #     graph.node[node_name]['color'] = 'red'
-
-            # if graph is not connected anymore put removed node back
-                else:
-                    graph.add_node(removed_node)  # , color = 'red')
-                    graph.add_edges_from(removed_edges)
-
-    # nx.draw(graph)
-    # plt.show()
-
-    laplacian_matrix = nx.laplacian_matrix(graph)
-    return laplacian_matrix.getA()
-
-<<<<<<< HEAD
 def lattice_graph(length):
     """
     Build a hexagonally gridded graph of a square shaped form
@@ -1323,34 +913,12 @@ def build_rand_graph(num_nodes):
     laplacian_matrix = nx.laplacian_matrix(graph)
     return laplacian_matrix.getA()
 
+
 FLAG = ""
->>>>>>> sender_plot
-=======
-FLAG = ""
->>>>>>> sender_plot
 
 
 def main():
     """main function which performs the whole retransmission"""
-<<<<<<< HEAD
-<<<<<<< HEAD
-    # laplacian matrix -> has the information about the network-topology
-    graph_matrix = np.array([[ 3, -1,  0, -1, -1,  0,  0,  0,  0,  0,  0,  0,  0],
-                             [-1,  3, -1, -1,  0,  0,  0,  0,  0,  0,  0,  0,  0],
-                             [ 0, -1,  4, -1,  0,  0, -1, -1,  0,  0,  0,  0,  0],
-                             [-1, -1, -1,  6, -1, -1, -1,  0,  0,  0,  0,  0,  0],
-                             [-1,  0,  0, -1,  3, -1,  0,  0,  0,  0,  0,  0,  0],
-                             [ 0,  0,  0, -1, -1,  5, -1,  0,  0, -1, -1,  0,  0],
-                             [ 0,  0, -1, -1,  0, -1,  6, -1, -1, -1,  0,  0,  0],
-                             [ 0,  0, -1,  0,  0,  0, -1,  3, -1,  0,  0,  0,  0],
-                             [ 0,  0,  0,  0,  0,  0, -1, -1,  3, -1,  0,  0,  0],
-                             [ 0,  0,  0,  0,  0, -1, -1,  0, -1,  5, -1,  0, -1],
-                             [ 0,  0,  0,  0,  0, -1,  0,  0,  0, -1,  4, -1, -1],
-                             [ 0,  0,  0,  0,  0,  0,  0,  0,  0,  0, -1,  1,  0],
-                             [ 0,  0,  0,  0,  0,  0,  0,  0,  0, -1, -1,  0,  2]])
-=======
-=======
->>>>>>> sender_plot
     # test_connectivity()
     # test_sba()
     # buffer_plots()
@@ -1373,10 +941,6 @@ def main():
     # val, vec = np.linalg.eig(graph_matrix)
     # val.sort()
     # print val[1]
-<<<<<<< HEAD
->>>>>>> sender_plot
-=======
->>>>>>> sender_plot
 
     #==========================================================================
     # graph_matrix = np.array([[ 2, -1,  0,  0, -1,  0],
@@ -1386,36 +950,6 @@ def main():
     #                          [-1, -1,  0, -1,  3,  0],
     #                          [ 0,  0,  0, -1,  0,  1]])
     #==========================================================================
-<<<<<<< HEAD
-<<<<<<< HEAD
-
-    my_graph = setup_graph(graph_matrix, ITERATION)
-    while True:
-        print "Your options are as follows:\n\n"\
-          "flooding ->\tPure Flooding in the Network\n"\
-          "SBA ->\t\tScalable Broadcast Algorithm\n"\
-          "AHBP ->\t\tAd-Hoc Broadcast Protocol\n"
-        FLAG = raw_input("Enter your Flag. To quit press enter\n")
-        if FLAG == "":
-            print 'Application is now shutting down'
-            break
-        elif FLAG == "SBA":
-            setup_sending_SBA(my_graph, ITERATION, FLAG)
-            print 'check SBA calculations'
-        elif FLAG == "AHBP":
-            setup_sending_AHBP(my_graph, ITERATION)
-            print 'check AHBP calculations'
-        elif FLAG == "flooding":
-            setup_sending_flooding(my_graph, ITERATION, FLAG)
-            print 'check flooding calculations'
-        create_figure(my_graph)
-    #==========================================================================
-    # print type(my_graph.nodes()[0])
-    # print my_graph.nodes()[0].__class__.__base__.__subclasses__()[0].__dict__['dummy_method'](my_graph.nodes()[0])
-    #==========================================================================
-=======
-=======
->>>>>>> sender_plot
     # graph_matrix = np.array([[ 6, -1, -1, -1, -1, -1, -1],
     #                          [-1,  3, -1,  0,  0,  0, -1],
     #                          [-1, -1,  3, -1,  0,  0,  0],
@@ -1460,9 +994,5 @@ def main():
     #     create_figure(my_graph)
 
 
-<<<<<<< HEAD
->>>>>>> sender_plot
-=======
->>>>>>> sender_plot
 if __name__ == '__main__':
     main()
