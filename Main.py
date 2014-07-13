@@ -1,3 +1,4 @@
+from __future__ import division
 #=============================================================================
 # this is the main file importing all other files and classes and executing all of it
 #=============================================================================
@@ -218,6 +219,7 @@ def setup_sending_half_sba(graph):
     """
     Perform the sending process according to parts of the SBA
 
+
     The parts with the random are cut out.
     Besides that everything is the same as in the complete SBA
 
@@ -390,7 +392,7 @@ def test_connectivity():
     # print con_lst
 
 
-def do_plots(flood_lst, ahbp_lst, sba_lst, half_sba, ax):
+def do_plots(flood_lst, ahbp_lst, sba_lst, ax):
     """
     Plot results of each algorithm
 
@@ -401,7 +403,6 @@ def do_plots(flood_lst, ahbp_lst, sba_lst, half_sba, ax):
     flood_lst -- list with the values for flooding
     ahbp_lst -- list with the values for the ahbp
     sba_lst -- list with the values for the sba
-    half_sba_lst -- list with the values for a simplified version of the sba
     ax -- axes object into which the data will be plotted
     mode -- integer for choosing the y-axis label
 
@@ -411,15 +412,13 @@ def do_plots(flood_lst, ahbp_lst, sba_lst, half_sba, ax):
     conn_flood, y_flood, flood_err = sort_dict(flood_lst)
     conn_ahbp, y_ahbp, ahbp_err = sort_dict(ahbp_lst)
     conn_sba, y_sba, sba_err = sort_dict(sba_lst)
-    conn_half_sba, y_half_sba, half_sba_err = sort_dict(half_sba)
 
-    ax.errorbar(conn_flood, y_flood, yerr=flood_err, marker='o')
-    ax.errorbar(conn_ahbp, y_ahbp, yerr=ahbp_err, color='red', marker='s')
-    ax.errorbar(conn_half_sba, y_half_sba, yerr=half_sba_err, color='green', marker='^')
-    ax.errorbar(conn_sba, y_sba, yerr=sba_err, color='orange', marker='D', capthick=3)
+    ax.errorbar(conn_flood, y_flood, yerr=None, marker='o')
+    ax.errorbar(conn_ahbp, y_ahbp, yerr=None, color='red', marker='s')
+    ax.errorbar(conn_sba, y_sba, yerr=None, color='orange', marker='D', capthick=3)
 
-    plt.setp(ax.get_xticklabels(), fontsize=14, fontstyle='oblique')
-    plt.setp(ax.get_yticklabels(), fontsize=14, fontstyle='oblique')
+    plt.setp(ax.get_xticklabels(), fontsize=21, fontstyle='oblique')
+    plt.setp(ax.get_yticklabels(), fontsize=21, fontstyle='oblique')
 
 
 def sort_dict(raw_dict):
@@ -452,7 +451,7 @@ def average_std(value_dict):
     value_dict -- dictionary now with key: connectivity; values: [ average, std ]
     """
     for number in value_dict:
-        average = np.average(value_dict[number])
+        average = round(np.average(value_dict[number]), 0)
         deviation = np.std(value_dict[number])
         value_dict[number] = [average, deviation]
     return value_dict
@@ -532,25 +531,23 @@ def test_sba():
     plt.show()
 
 
-def arrange_data(flood, ahbp_dict, sba_dict, half_sba_dict):
+def arrange_data(flood, ahbp_dict, sba_dict):
     """
-    Delete all entries in ahbp, sba, half_sba which are equal to the corresponding in the flood list
+    Delete all entries in ahbp, sba which are equal to the corresponding in the flood list
 
     Dictionaries with algebraic connectivity as key and max number of messages processed as value
-    If the latter 3 dictionaries have a value for a key equal to the one in the flood-dict then delete it.
+    If the latter 2 dictionaries have a value for a key equal to the one in the flood-dict then delete it.
     Lastly turn them into OrderedDict( dictionaries that can be sorted)
 
     Arguments:
     flood -- Dictionary containing the data from flooding the graph
     ahbp_dict -- Dictionary containing the data from performing the AHBP algorithm
     sba_dict -- Dictionary containing the data from performing the SBA algorithm
-    half_sba_dict -- Dictionary containing the data from performing only parts of the SBA algorithm
 
     Return-type:
     ordered_flood -- OrderedDict; contains the same as flood
     ordered_ahbp -- OrderedDict; filtered ahbp_dict
     ordered_sba -- OrderedDict; filtered sba_dict
-    ordered_half_sba -- OrderedDict; fileredt half_sba_dict
     """
     for conn in ahbp_dict:
         deleter = []
@@ -566,32 +563,20 @@ def arrange_data(flood, ahbp_dict, sba_dict, half_sba_dict):
                 deleter.append(0)
         for zero in deleter:
             sba_dict[conn].remove(zero)
-    for conn in half_sba_dict:
-        deleter = []
-        for number in half_sba_dict[conn]:
-            if number == 0:
-                deleter.append(0)
-        for zero in deleter:
-            half_sba_dict[conn].remove(zero)
     for conn, values in ahbp_dict.items():
         if values == []:
             del ahbp_dict[conn]
     for conn, values in sba_dict.items():
         if values == []:
             del sba_dict[conn]
-    for conn, values in half_sba_dict.items():
-        if values == []:
-            del half_sba_dict[conn]
     ordered_flood = OrderedDict(flood)
     ordered_ahbp = OrderedDict(ahbp_dict)
     ordered_sba = OrderedDict(sba_dict)
-    ordered_half_sba = OrderedDict(half_sba_dict)
     print 'flood', ordered_flood
     print 'ahbp', ordered_ahbp
     print 'sba', ordered_sba
-    print 'half_sba', ordered_half_sba
 
-    return ordered_flood, ordered_ahbp, ordered_sba, ordered_half_sba
+    return ordered_flood, ordered_ahbp, ordered_sba
 
 
 def buffer_plots():
@@ -609,33 +594,30 @@ def buffer_plots():
     Return-type:
     Plot a graph with possibility to arrange and save it manually
     """
-    max_size = 4
-    samples = 2
+    # max_size = 1
+    samples = 100
 
     # x_lst = [i for i in range(2, max_size+1)]
-    x_lst = [15, 20, 30, 40]
+    x_lst = [5, 6, 7]
 
     fig = plt.figure('Max buffer-length')
 
     for size in range(len(x_lst)):
         print x_lst[size]
 
-        ax = fig.add_subplot(max_size/2, 2, size-1)
+        ax = fig.add_subplot(round(len(x_lst)/2, 0), 2, size + 1)
 
         flood_mes = {}
         ahbp_mes = {}
         sba_mes = {}
-        half_sba_mes = {}
 
         flood_rebroad = {}
         ahbp_rebroad = {}
         sba_rebroad = {}
-        half_rebroad = {}
 
         flood_max = {}
         ahbp_max = {}
         sba_max = {}
-        half_sba_max = {}
 
         # for a in range(samples):
         for a in range(samples):
@@ -644,6 +626,8 @@ def buffer_plots():
                 graph, laplacian = random_graph(x_lst[size])
                 if x_lst[size] > 20:
                     conn = round(get_connectivity(laplacian), 4)
+                elif x_lst[size] == 20:
+                    conn = round(get_connectivity(laplacian), 3)
                 else:
                     conn = round(get_connectivity(laplacian), 2)
             # get values for flooding
@@ -663,13 +647,6 @@ def buffer_plots():
             ahbp_rebroad, ahbp_mes, ahbp_max = update_dict(ahbp_mes, ahbp_rebroad, ahbp_max, conn, rebroadcaster, messages, max_mes)
             clear_graph_data(graph)
             # get values for SBA
-            setup_sending_half_sba(graph)
-            rebroadcaster = get_num_sender(graph)
-            messages, max_mes = get_message_counter(graph)
-            if max_mes == max_mes_flood:
-                max_mes = 0
-            half_rebroad, half_sba_mes, half_sba_max = update_dict(half_sba_mes, half_rebroad, half_sba_max, conn, rebroadcaster, messages, max_mes)
-            clear_graph_data(graph)
             iteration = setup_sending_SBA(graph, 2)
             rebroadcaster = get_num_sender(graph)
             messages, max_mes = get_message_counter(graph)
@@ -678,7 +655,7 @@ def buffer_plots():
             sba_rebroad, sba_mes, sba_max = update_dict(sba_mes, sba_rebroad, sba_max, conn, rebroadcaster, messages, max_mes)
             clear_graph_data(graph)
 
-        flood_max, ahbp_max, sba_max, half_sba_max = arrange_data(flood_max, ahbp_max, sba_max, half_sba_max)
+        flood_max, ahbp_max, sba_max = arrange_data(flood_max, ahbp_max, sba_max)
         flood_conn = flood_max.keys()
         flood_y = flood_max.values()
         flood_x = []
@@ -703,35 +680,29 @@ def buffer_plots():
                 sba_x.append(sba_conn[i])
         sba_y = list(it.chain.from_iterable(sba_y))
         ax.plot(sba_x, sba_y, linestyle='None', marker='D', color='orange')
-        half_sba_conn = half_sba_max.keys()
-        half_sba_y = half_sba_max.values()
-        half_sba_x = []
-        for i in range(len(half_sba_conn)):
-            for j in range(len(half_sba_y[i])):
-                half_sba_x.append(half_sba_conn[i])
-        half_sba_y = list(it.chain.from_iterable(half_sba_y))
-        ax.plot(half_sba_x, half_sba_y, linestyle='None', marker='^', color='green')
-        ax.set_title('Graph size: {0}'.format(x_lst[size]), fontstyle='oblique',fontsize=16)
-        plt.setp(ax.get_xticklabels(), fontsize=14, fontstyle='oblique')
-        plt.setp(ax.get_yticklabels(), fontsize=14, fontstyle='oblique')
+        ax.set_title('Graph size: {0}'.format(x_lst[size]),fontsize=24, fontweight='bold')
+        plt.setp(ax.get_xticklabels(), fontsize=22, fontstyle='oblique')
+        plt.setp(ax.get_yticklabels(), fontsize=22, fontstyle='oblique')
     # sometimes one needs to hack a lil bit
     # access the matplotlib.line objects through it
-    lines = fig._axstack._elements[0][1][1].lines
+        lines = fig._axstack._elements[0][1][1].lines
+        ax.legend((lines[0], lines[1], lines[2]),
+                ('flood', 'ahbp', 'sba'), loc=4, prop={'size':20})
     # print lines
-    fig.text(0.5, 0.05, 'Algebraic connectivity', style='oblique', size=18, horizontalalignment='center')
-    fig.text(0.05, 0.5, 'Max. Messages', style='oblique', size=18, rotation='vertical', verticalalignment='center')
-    fig.legend((lines[0], lines[1], lines[2], lines[3]),
-                ('flood', 'ahbp', 'sba', 'half_sba'), 'lower right')
-    plt.show()
+    fig.text(0.5, 0.05, 'Algebraic connectivity', style='oblique', size=24, fontweight='semibold', horizontalalignment='center')
+    fig.text(0.05, 0.5, 'Max. Messages', style='oblique', size=24, fontweight='semibold', rotation='vertical', verticalalignment='center')
+    # ax.legend((lines[0], lines[1], lines[2]),
+    #             ('flood', 'ahbp', 'sba'), loc=4, prop={'size':20})
+    # plt.show()
 
 
-def test_plots():  # currently everything except the flooding is disabled in this function
-    max_size = 4
-    samples = 2
+def test_plots():
+    # max_size = 1
+    samples = 50
 
     # x_lst = [i for i in range(2, max_size+1)]
 
-    x_lst = [15, 20, 30, 40]
+    x_lst = [5, 6, 7]
 
     fig1 = plt.figure('Total messages')
     fig2 = plt.figure('Number of rebroadcaster')
@@ -739,24 +710,25 @@ def test_plots():  # currently everything except the flooding is disabled in thi
 
     for size in range(len(x_lst)):
         print x_lst[size]
-        ax1 = fig1.add_subplot(max_size/2, 2, size+1)
-        ax2 = fig2.add_subplot(max_size/2, 2, size+1)
+        if len(x_lst) == 1:
+            ax1 = fig1.add_subplot(1, 1, size + 1)
+            ax2 = fig2.add_subplot(1, 1, size + 1)
+        else:
+            ax1 = fig1.add_subplot(round(len(x_lst)/2, 0), 2, size + 1)
+            ax2 = fig2.add_subplot(round(len(x_lst)/2, 0), 2, size + 1)
         # ax3 = fig3.add_subplot(max_size/2, 2, size-1)
 
         flood_mes = {}
         ahbp_mes = {}
         sba_mes = {}
-        half_sba_mes = {}
 
         flood_rebroad = {}
         ahbp_rebroad = {}
         sba_rebroad = {}
-        half_rebroad = {}
 
         flood_max = {}
         ahbp_max = {}
         sba_max = {}
-        half_sba_max = {}
 
         # for a in range(samples):
         for a in range(samples):
@@ -765,6 +737,8 @@ def test_plots():  # currently everything except the flooding is disabled in thi
                 graph, laplacian = random_graph(x_lst[size])
                 if x_lst[size] > 20:
                     conn = round(get_connectivity(laplacian), 4)
+                elif x_lst[size] == 20:
+                    conn = round(get_connectivity(laplacian), 3)
                 else:
                     conn = round(get_connectivity(laplacian), 2)
             # get values for flooding
@@ -784,12 +758,6 @@ def test_plots():  # currently everything except the flooding is disabled in thi
             ahbp_rebroad, ahbp_mes, ahbp_max = update_dict(ahbp_mes, ahbp_rebroad, ahbp_max, conn, rebroadcaster, messages, max_mes)
             clear_graph_data(graph)
             # get values for SBA
-            print 'half_sba'
-            setup_sending_half_sba(graph)
-            rebroadcaster = get_num_sender(graph)
-            messages, max_mes = get_message_counter(graph)
-            half_rebroad, half_sba_mes, half_sba_max = update_dict(half_sba_mes, half_rebroad, half_sba_max, conn, rebroadcaster, messages, max_mes)
-            clear_graph_data(graph)
             print 'sba'
             iteration = setup_sending_SBA(graph, 2)
             rebroadcaster = get_num_sender(graph)
@@ -797,17 +765,14 @@ def test_plots():  # currently everything except the flooding is disabled in thi
             sba_rebroad, sba_mes, sba_max = update_dict(sba_mes, sba_rebroad, sba_max, conn, rebroadcaster, messages, max_mes)
             clear_graph_data(graph)
 
-        # print flood_mes
 
         flood_mes = average_std(flood_mes)
         ahbp_mes = average_std(ahbp_mes)
-        half_sba_mes = average_std(half_sba_mes)
         sba_mes = average_std(sba_mes)
 
         flood_rebroad = average_std(flood_rebroad)
         ahbp_rebroad = average_std(ahbp_rebroad)
         sba_rebroad = average_std(sba_rebroad)
-        half_rebroad = average_std(half_rebroad)
 
 
         # flood_max = average_std(flood_max)
@@ -816,28 +781,36 @@ def test_plots():  # currently everything except the flooding is disabled in thi
         # sba_max = average_std(sba_max)
 
         # do_plots(flood_max, ahbp_max, sba_max, half_sba_max, ax3, 3)
-        do_plots(flood_mes, ahbp_mes, sba_mes, half_sba_mes, ax1)
-        ax1.set_title('Graph size: {0}'.format(x_lst[size]), fontstyle='oblique',fontsize=16)
-        do_plots(flood_rebroad, ahbp_rebroad, sba_rebroad, half_rebroad, ax2)
-        ax2.set_title('Graph size: {0}'.format(x_lst[size]), fontstyle='oblique',fontsize=16)
+        do_plots(flood_mes, ahbp_mes, sba_mes, ax1)
+        ax1.set_title('Graph size: {0}'.format(x_lst[size]), fontweight='bold',fontsize=24)
+        do_plots(flood_rebroad, ahbp_rebroad, sba_rebroad, ax2)
+        ax2.set_title('Graph size: {0}'.format(x_lst[size]), fontweight='bold',fontsize=24)
 
-    # sometimes one needs to hack a lil bit
-    # access the matplotlib.line objects through
-    lines1 = fig1._axstack._elements[0][1][1].lines
-    lines2 = fig2._axstack._elements[0][1][1].lines
-    # lines3 = fig3._axstack._elements[0][1][1].lines
+        # sometimes one needs to hack a lil bit
+        # access the matplotlib.line objects through
+        lines1 = fig1._axstack._elements[0][1][1].lines
+        lines2 = fig2._axstack._elements[0][1][1].lines
+        # lines3 = fig3._axstack._elements[0][1][1].lines
 
-    fig1.legend((lines1[2], lines1[5], lines1[8], lines1[11]),
-                ('flood', 'ahbp', 'half_sba', 'sba'), 'lower right')
-    fig1.text(0.5, 0.05, 'Algebraic connectivity', style='oblique', size=18, horizontalalignment='center')
-    fig1.text(0.05, 0.5, 'Total number of messages', style='oblique', size=18, rotation='vertical', verticalalignment='center')
-    fig2.legend((lines2[2], lines2[5], lines2[8], lines2[11]),
-                ('flood', 'ahbp', 'half_sba', 'sba'), 'lower right')
-    fig2.text(0.5, 0.05, 'Algebraic Connectivity', style='oblique', size=18, horizontalalignment='center')
-    fig2.text(0.05, 0.5, 'Retransmitting nodes', style='oblique', size=18, rotation='vertical', verticalalignment='center')
+        ax1.legend((lines1[0], lines1[1], lines1[2]),
+                ('flood', 'ahbp', 'sba'), 'upper left',
+                prop={'size': 20})
+        ax2.legend((lines2[0], lines2[1], lines2[2]),
+                ('flood', 'ahbp', 'sba'), 'upper left',
+                prop={'size': 20})
+
+    fig1.text(0.5, 0.05, 'Algebraic connectivity', style='oblique',
+              fontweight='semibold', size=24, horizontalalignment='center')
+    fig1.text(0.05, 0.5, 'Total number of messages', style='oblique',
+              fontweight='semibold', size=24, rotation='vertical', verticalalignment='center')
+
+    fig2.text(0.5, 0.05, 'Algebraic Connectivity', style='oblique',
+              fontweight='semibold', size=24, horizontalalignment='center')
+    fig2.text(0.05, 0.5, 'Retransmitting nodes', style='oblique',
+              fontweight='semibold', size=24, rotation='vertical', verticalalignment='center')
     # fig3.legend((lines3[2], lines3[5], lines3[8], lines3[11]),
     #             ('flood', 'ahbp', 'half_sba', 'sba'), 'lower right')
-    plt.show()
+    # plt.show()
 
 
 def lattice_graph(length):
@@ -946,8 +919,9 @@ def main():
     """main function which performs the whole retransmission"""
     # test_connectivity()
     # test_sba()
-    buffer_plots()
-    # test_plots()
+    # buffer_plots()
+    test_plots()
+    plt.show()
     # # laplacian matrix -> has the information about the network-topology
     # graph_matrix = np.array([[ 3, -1,  0, -1, -1,  0,  0,  0,  0,  0,  0,  0,  0],
     #                          [-1,  3, -1, -1,  0,  0,  0,  0,  0,  0,  0,  0,  0],
