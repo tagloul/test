@@ -4,26 +4,15 @@ from __future__ import division
 #=============================================================================
 # hello world!
 import networkx as nx
-import numpy as np
 import matplotlib.pyplot as plt
 import Graph
 import NodeClass as nde
 import SBAClass as sba
 import AHBPClass as ahbp
-<<<<<<< HEAD
-<<<<<<< HEAD
-import Package as pkt
-=======
-=======
->>>>>>> sender_plot
 import random
 import numpy as np
 from collections import OrderedDict
 import itertools as it
-<<<<<<< HEAD
->>>>>>> sender_plot
-=======
->>>>>>> sender_plot
 
 
 def check_nodes(graph):
