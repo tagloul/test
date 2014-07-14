@@ -18,6 +18,9 @@ import numpy as np
 import matplotlib.animation as animation
 import networkx as nx
 import math
+import itertools as it
+import Main as mn
+
 
 
 class PlotBars(object):
@@ -86,7 +89,7 @@ def bar_plot(graph, node_num, fig):
     ani = animation.FuncAnimation(fig, animate, len(width_hist[:, 0]),
                                   fargs=(mybars, width_hist),
                                   interval=2000, blit=False, repeat=False)
-    ani.save('node_' + str(node_num) + '.mp4', codec = ffmpeg)
+    ani.save('node_' + str(node_num) + '.mp4', codec=ffmpeg)
              # extra_args=['-vcodec', 'libx264'])
     # plt.show()
 
@@ -155,3 +158,99 @@ def print_all_data_stacks(graph):
         for item in node.data_stack:
             print(item.value)
         print('\n')
+
+
+def plot_data(flood_lst, ahbp_lst, sba_lst, ax):
+    """
+    Plot results of each algorithm
+
+    Dictionaries contain connectivity as key and mean value and standart deviation as values
+    Plot, with errorbars, all in the same axes-object.
+
+    Arguments:
+    flood_lst -- list with the values for flooding
+    ahbp_lst -- list with the values for the ahbp
+    sba_lst -- list with the values for the sba
+    ax -- axes object into which the data will be plotted
+    mode -- integer for choosing the y-axis label
+
+    Return-type:
+    None
+    """
+    conn_flood, y_flood, flood_err = mn.sort_dict(flood_lst)
+    conn_ahbp, y_ahbp, ahbp_err = mn.sort_dict(ahbp_lst)
+    conn_sba, y_sba, sba_err = mn.sort_dict(sba_lst)
+
+    ax.errorbar(conn_flood, y_flood, yerr=None, marker='o')
+    ax.errorbar(conn_ahbp, y_ahbp, yerr=None, color='red', marker='s')
+    ax.errorbar(conn_sba, y_sba, yerr=None, color='orange', marker='D', capthick=3)
+
+    plt.setp(ax.get_xticklabels(), fontsize=21, fontstyle='oblique')
+    plt.setp(ax.get_yticklabels(), fontsize=21, fontstyle='oblique')
+
+
+def plot_maxload(value_dict, ax, flag):
+    """
+    Plots the max load of any node in graph
+
+    Gathered data in the value_dict is plotted . The flag is a identifier
+    for the used broadcasting scheme.
+
+    Argument:
+    value_dict -- dictionary with the data to plot
+    ax -- matplotlib.axes object
+    flag -- string identifier
+    """
+    # recall that value_dict has the alg con as keys
+    # and the measured data in lists as values
+    conn = value_dict.keys()
+    y_values = value_dict.values()
+    x_values = []
+    for i in range(len(conn)):
+        for j in range(len(y_values[i])):
+            x_values.append(conn[i])
+    y_values = list(it.chain.from_iterable(y_values))
+    if flag == 'flood':
+        ax.plot(x_values, y_values, linestyle='None', marker='o', color='blue')
+    elif flag == 'ahbp':
+        ax.plot(x_values, y_values, linestyle='None', marker='s', color='red')
+    elif flag == 'sba':
+        ax.plot(x_values, y_values, linestyle='None', marker='D', color='orange')
+
+
+def format_plots(ax, size, flag):
+    """
+    Add desired optical changes to the plots
+
+    Argument:
+    ax -- matplotlib.axes object where the plots are stored
+    size -- size of the plotted graph
+    """
+    ax.set_title('Graph size: {0}'.format(size), fontsize=24, fontweight='bold')
+    plt.setp(ax.get_xticklabels(), fontsize=22, fontstyle='oblique')
+    plt.setp(ax.get_yticklabels(), fontsize=22, fontstyle='oblique')
+    lines = ax.lines
+    if flag == 'max_load':
+        ax.legend((lines[0], lines[1], lines[2]), ('flood', 'ahbp', 'sba'), 'lower right')
+    elif flag == 'retransmission' or flag == 'messages':
+        ax.legend((lines[0], lines[1], lines[2]), ('flood', 'ahbp', 'sba'), 'upper left')
+
+def format_figure(fig, flag):
+    """
+    Add desired optical changes to the figure/window
+
+    Argument:
+    fig -- matplotlib.figure object where the axes objects are
+    flag -- string identifier for the plotted data
+    """
+    fig.text(0.5, 0.05, 'Algebraic connectivity', style='oblique', fontweight='semibold',
+             size=24, horizontalalignment='center')
+    if flag == 'retransmission':
+        fig.text(0.05, 0.5, 'Retransmitting nodes', style='oblique', fontweight='semibold',
+                 size=24, rotation='vertical', verticalalignment='center')
+    elif flag == 'messages':
+        fig.text(0.05, 0.5, 'Total number of messages', style='oblique', fontweight='semibold',
+                 size=24, rotation='vertical', verticalalignment='center')
+    elif flag == 'max_load':
+        fig.text(0.05, 0.5, 'Max. Messages', style='oblique', fontweight='semibold',
+                 size=24, rotation='vertical', verticalalignment='center')
