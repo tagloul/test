@@ -579,7 +579,7 @@ def gather_data(graph, conn, rebroad, mes, max):
                                     rebroadcaster, messages, max_mes)
     return rebroad, mes, max
 
-def buffer_plots():
+def create_plots():
     """
     Execute simulations, gather data and plot it
 
@@ -595,10 +595,10 @@ def buffer_plots():
     Plot a graph with possibility to arrange and save it manually
     """
     # max_size = 1
-    samples = 100
+    samples = 500
 
     # x_lst = [i for i in range(2, max_size+1)]
-    x_lst = [5, 6, 7]
+    x_lst = [6]
 
     fig3 = plt.figure('Max buffer-length')
     fig2 = plt.figure('Messages sent')
@@ -785,7 +785,7 @@ def build_rand_graph(num_nodes):
 
 def main():
     """main function which performs the whole retransmission"""
-    buffer_plots()
+    create_plots()
     plt.show()
 
 if __name__ == '__main__':
