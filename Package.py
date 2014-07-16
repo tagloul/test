@@ -50,5 +50,4 @@ class Packet(object):
         if self.brg:
             content += "BRG-Set: {0}".format(self.brg)
         content += "\n"
-        # content = np.array(content).reshape(1,)
         return content

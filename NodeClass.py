@@ -4,7 +4,6 @@
 # generating random or determined Messages
 #==============================================================================
 
-import numpy as np
 import copy
 import random
 import Package as pac
@@ -20,7 +19,7 @@ class Node(object):
     obj_counter = 0  # in order to initiate the node.id
 
     # just cancelled out the arguments in the init method
-    def __init__(self):  # , size, iteration): # just removed the number of iteration for the packet_history
+    def __init__(self):  # , size, iteration):  just removed the number of iteration for the packet_history
         """
         Initialize a node instance
 
@@ -162,7 +161,7 @@ class Node(object):
                 # append 5 for each message in the sending_buffer
                 self.message_counter.append(5)
 
-    def update_data(self, FLAG):
+    def update_data(self, flag):
         """
         Check the receive_buffer for unknown messages
 
@@ -178,7 +177,7 @@ class Node(object):
             if not boolean:
                 message.add_to_path(self)
                 self.data_stack.append(message)
-                if FLAG != "SBA":
+                if flag != "SBA":
                     self.sending_buffer.append(message)
                     # the value is stored in the row = to the origin of the packet
                     # row = data.origin - 1
@@ -202,42 +201,6 @@ class Node(object):
         self.data_stack.append(new_packet)
         self.sending_buffer.append(new_packet)
         # self.packet_history[self.ID, :] = new_packet.value
-
-    def init_data(self):  # todo find a way to eliminate these if statements
-        """ugly random data generator -.- yet still does what it is supposed
-        to do. ONLY for testing; creates random packets """
-        init_rand = random.randint(0, 5)
-        if init_rand != 0:  # prob of 1 over range of randint()
-            pass
-        else:
-            type_rand = random.randint(1, 3)  # determines the type of packet
-            data = 5 * random.random()  # actual data
-            if type_rand == 1:
-                max_seq = 0
-                for item in self.data_stack:
-                    if item.type == "height" and item.origin == self.ID:
-                        if item.seq_number > max_seq:
-                            max_seq = item.seq_number
-                new_packet = pac.Packet(data, max_seq + 1, self.ID, "height")
-                new_packet.add_to_path(self)
-            elif type_rand == 2:
-                max_seq = 0
-                for item in self.data_stack:
-                    if item.type == "angles" and item.origin == self.ID:
-                        if item.seq_number > max_seq:
-                            max_seq = item.seq_number
-                new_packet = pac.Packet(data, max_seq + 1, self.ID, "angles")
-                new_packet.add_to_path(self)
-            elif type_rand == 3:
-                max_seq = 0
-                for item in self.data_stack:
-                    if item.type == "velocity" and item.origin == self.ID:
-                        if item.seq_number > max_seq:
-                            max_seq = item.seq_number
-                new_packet = pac.Packet(data, max_seq + 1, self.ID, "velocity")
-                new_packet.add_to_path(self)
-            self.data_stack.append(new_packet)
-            self.sending_buffer.append(new_packet)
 
     ID = property(get_ID)
     data_stack = property(get_data_stack, set_data_stack)

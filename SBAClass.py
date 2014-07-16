@@ -1,3 +1,4 @@
+from __future__ import division
 """
 This file contains all functions related to the Scalable Broadcast Algorithm.
 Note that since it does not inherit from the Node Class, the considered node
@@ -7,14 +8,6 @@ import random
 import math
 import Package
 
-
-    #==========================================================================
-    # def __init__(self, size, iteration):
-    #     super(SBA, self).__init__(size, iteration)
-    #     # contains all messages currently processed by SBA
-    #     self.packet_dict = {}
-    #     self.cover_dict = {}
-    #==========================================================================
 
 # packet_dict contains the iteration when the message was received and the actual iteration
 # it contains all messages in the data_stack which are currently processed by the SBAlgorithm
@@ -57,8 +50,6 @@ def update_packet_dict(calling_node, iteration):
                 calling_node.sending_buffer.append(packet)
         # if timer has not yet expired-> update cover_set
         # just commented these two lines
-        # else:
-        #     update_cover_set(calling_node, packet)
     for pack in packets_to_del:
         del calling_node.packet_dict[pack]
         del calling_node.cover_dict[(pack.origin, pack.seq_number)]
@@ -76,7 +67,7 @@ def check_packet_dict(calling_node, packet):
     Return-type:
     Boolean
     """
-        #assert type(packet) == packet.Package
+    #assert type(packet) == packet.Package
     origin_check = 0
     seq_check = 0
     for item in calling_node.packet_dict.keys():
@@ -123,13 +114,13 @@ def check_receive_buffer(calling_node, iteration, timer):
             if not bool_neigh:
                 t = get_random_timer(calling_node, timer)
                 calling_node.packet_dict[message] = (t, iteration)
-                # update_cover_set(calling_node, message)
                 identifier = (message.origin, message.seq_number)
                 calling_node.cover_dict[identifier] = [message.last_node]
                 for neigh in message.last_node.two_hop_dict:
                     calling_node.cover_dict[identifier].append(neigh)
     # after having processed all messages in the receive_buffer clear it
     calling_node.del_receive_buffer()
+
 
 def check_neigh(calling_node, neigh):
     """
@@ -138,7 +129,7 @@ def check_neigh(calling_node, neigh):
     Return False if there are node in the calling_node neighborhood
     not covered by the senders neighborhood else return True
 
-    Return-type:
+    Return-type50
     Boolean
     """
     for node in calling_node.two_hop_dict:
@@ -174,6 +165,7 @@ def get_random_timer(calling_node, timer_para):
             degree_neigh = new_degree
     degree_node = len(calling_node.two_hop_dict.keys())
     T_0 = float(1 + degree_neigh) / (1 + degree_node)
+    T_0 = 1/T_0
         # set the random time value for the argument of the
         # uniform-distribution
     # this is a tuning-parameter, which is still open
@@ -201,9 +193,6 @@ def update_cover_set(calling_node, message):
     """
     identifier = (message.origin, message.seq_number)
     message_node = message.last_node
-
-    # if identifier not in calling_node.cover_dict:
-    #     calling_node.cover_dict[identifier] = []
 
     if message_node not in calling_node.cover_dict[identifier]:
         calling_node.cover_dict[identifier].append(message_node)

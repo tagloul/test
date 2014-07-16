@@ -107,7 +107,6 @@ def setup_sending_flooding(graph):
         node.send_to_neighbor(graph.neighbors(node))
 
 
-
 def setup_sending_SBA(graph, timer):
     """
     Perform the sending process according to the SBA
@@ -127,7 +126,6 @@ def setup_sending_SBA(graph, timer):
     Return-type:
     none
     """
-    flag = 'SBA'
     # initiate all nodes with a data packet
     for node in graph.nodes():
         node.init_1_data()
@@ -135,21 +133,21 @@ def setup_sending_SBA(graph, timer):
     # update each packet_dict, containing all the packets
     # that currently have an active random timer
     iteration = 0
-    while not check_nodes(graph):
+    for i in range(100):
+    # while not check_nodes(graph):
         for node in graph.nodes():
             sba.check_receive_buffer(node, iteration, timer)
         for node in graph.nodes():
             sba.update_packet_dict(node, iteration)
         # forward packet in the sending list to neighbors
+        # print 'sending'
         for node in graph.nodes():
-            # check if node rebroadcasts any messages
             node.send_to_neighbor(node.two_hop_dict.keys())
             node.del_sending_buffer()
 
         iteration += 1
     for node in graph.nodes():
         node.send_to_neighbor(graph.neighbors(node))
-    return iteration
 
 
 def setup_sending_AHBP(graph):
@@ -229,7 +227,6 @@ def setup_sending_half_sba(graph):
             node.send_to_neighbor(node.two_hop_dict.keys())
             node.del_sending_buffer()
 
-
         for node in graph.nodes_iter():
             for message in node.receive_buffer:
                 boolean = node.check_data_stack(message)
@@ -237,7 +234,7 @@ def setup_sending_half_sba(graph):
                     message.add_to_path(node)
                     node.data_stack.append(message)
                     if not sba.check_neigh(node, message.last_node):
-                       node.sending_buffer.append(message)
+                        node.sending_buffer.append(message)
 
             node.del_receive_buffer()
         iteration += 1
@@ -363,8 +360,7 @@ def test_connectivity():
         if con not in conn_dict:
             conn_dict[con] = 0
         conn_dict[con] += 1
-    con_lst = OrderedDict(sorted(conn_dict.items()))
-    # print conn_lst
+    # con_lst = OrderedDict(sorted(conn_dict.items()))
     # print con_lst
 
 
@@ -461,6 +457,7 @@ def update_dict(mes_dict, rebroad_dict, max_dict, conn, rebroad, mes, max_mes):
     rebroad_dict[conn].append(rebroad)
     return rebroad_dict, mes_dict, max_dict
 
+
 def test_sba():
     """
     Test function to investigate certain graphs
@@ -471,28 +468,24 @@ def test_sba():
     print all the collected data from the samples
     """
     size = 6
-    samples = 2000
+    samples = 1000
 
-    fig = plt.figure('sba')
-    ax1 = fig.add_subplot(2, 1, 1)
-    ax2 = fig.add_subplot(2, 1, 2)
+    # fig = plt.figure('sba')
+    # ax1 = fig.add_subplot(2, 1, 1)
+    # ax2 = fig.add_subplot(2, 1, 2)
     x_lst = []
     messages = []
     rebroadcaster = []
     for i in range(samples):
         graph, laplacian = random_graph(size)
-        # graph dont makes any sense right now, cuz x-lst is not right
         x_lst.append(get_connectivity(laplacian))
         if 1.1 > x_lst[-1] > 0.9:
             setup_sending_SBA(graph, 5)
             mes_num, max_mes = get_message_counter(graph)
             messages.append(mes_num)
             rebroadcaster.append(get_num_sender(graph))
-            print x_lst[-1], messages[-1], rebroadcaster[-1]
-            Graph.print_graph(graph)
-    print x_lst
-    print messages
-    print rebroadcaster
+            print x_lst[-1], messages[-1], rebroadcaster[-1], max_mes
+            # Graph.print_graph(graph)
     mx = zip(x_lst, messages)
     mx.sort()
     xm, messages = zip(*mx)
@@ -503,8 +496,8 @@ def test_sba():
     print xm, messages
     print xr, rebroadcaster
 
-    ax1.plot(xm, messages, marker='o')
-    ax2.plot(xr, rebroadcaster, marker='o')
+    # ax1.plot(xm, messages, marker='o')
+    # ax2.plot(xr, rebroadcaster, marker='o')
     plt.show()
 
 
@@ -542,10 +535,10 @@ def arrange_data(size, flood, ahbp_dict, sba_dict):
         for trash in deleter:
             sba_dict[conn].remove(trash)
     for conn, values in ahbp_dict.items():
-        if values == []:
+        if not values:  # if values list is empty check
             del ahbp_dict[conn]
     for conn, values in sba_dict.items():
-        if values == []:
+        if not values:  # if values list is empty check
             del sba_dict[conn]
     ordered_flood = OrderedDict(flood)
     ordered_ahbp = OrderedDict(ahbp_dict)
@@ -557,7 +550,7 @@ def arrange_data(size, flood, ahbp_dict, sba_dict):
     return ordered_flood, ordered_ahbp, ordered_sba
 
 
-def gather_data(graph, conn, rebroad, mes, max):
+def gather_data(graph, conn, rebroad, mes, max_load):
     """
     Simply gathers the data from a graph onto which a sending algorithm has been performed
 
@@ -575,9 +568,10 @@ def gather_data(graph, conn, rebroad, mes, max):
     """
     messages, max_mes = get_message_counter(graph)
     rebroadcaster = get_num_sender(graph)
-    rebroad, mes, max = update_dict(mes, rebroad, max, conn,
-                                    rebroadcaster, messages, max_mes)
-    return rebroad, mes, max
+    rebroad, mes, max_load = update_dict(mes, rebroad, max_load, conn,
+                                         rebroadcaster, messages, max_mes)
+    return rebroad, mes, max_load
+
 
 def create_plots():
     """
@@ -595,10 +589,10 @@ def create_plots():
     Plot a graph with possibility to arrange and save it manually
     """
     # max_size = 1
-    samples = 500
+    samples = 50
 
     # x_lst = [i for i in range(2, max_size+1)]
-    x_lst = [6]
+    x_lst = [50]
 
     fig3 = plt.figure('Max buffer-length')
     fig2 = plt.figure('Messages sent')
@@ -650,7 +644,7 @@ def create_plots():
             ahbp_rebroad, ahbp_mes, ahbp_max = gather_data(graph, conn, ahbp_rebroad, ahbp_mes, ahbp_max)
             clear_graph_data(graph)
             # get values for SBA
-            iteration = setup_sending_SBA(graph, 2)
+            setup_sending_SBA(graph, 2)
             sba_rebroad, sba_mes, sba_max = gather_data(graph, conn, sba_rebroad, sba_mes, sba_max)
             clear_graph_data(graph)
 
@@ -786,6 +780,7 @@ def build_rand_graph(num_nodes):
 def main():
     """main function which performs the whole retransmission"""
     create_plots()
+    # test_sba()
     plt.show()
 
 if __name__ == '__main__':

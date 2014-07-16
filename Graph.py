@@ -22,7 +22,6 @@ import itertools as it
 import Main as mn
 
 
-
 class PlotBars(object):
     """A plotbar object stands for a node to be plotted"""
     def __init__(self, bars):
