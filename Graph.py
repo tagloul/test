@@ -180,9 +180,9 @@ def plot_data(flood_lst, ahbp_lst, sba_lst, ax):
     conn_ahbp, y_ahbp, ahbp_err = mn.sort_dict(ahbp_lst)
     conn_sba, y_sba, sba_err = mn.sort_dict(sba_lst)
 
-    ax.errorbar(conn_flood, y_flood, yerr=None, marker='o')
-    ax.errorbar(conn_ahbp, y_ahbp, yerr=None, color='red', marker='s')
-    ax.errorbar(conn_sba, y_sba, yerr=None, color='orange', marker='D', capthick=3)
+    ax.errorbar(conn_flood, y_flood, yerr=None, marker='o', markersize=6)
+    ax.errorbar(conn_ahbp, y_ahbp, yerr=None, color='red', marker='s', markersize=9)
+    ax.errorbar(conn_sba, y_sba, yerr=None, color='orange', marker='D', markersize=7)
 
     plt.setp(ax.get_xticklabels(), fontsize=21, fontstyle='oblique')
     plt.setp(ax.get_yticklabels(), fontsize=21, fontstyle='oblique')
@@ -210,11 +210,11 @@ def plot_maxload(value_dict, ax, flag):
             x_values.append(conn[i])
     y_values = list(it.chain.from_iterable(y_values))
     if flag == 'flood':
-        ax.plot(x_values, y_values, linestyle='None', marker='o', color='blue')
+        ax.plot(x_values, y_values, linestyle='None', marker='o', color='blue', markersize=7)
     elif flag == 'ahbp':
-        ax.plot(x_values, y_values, linestyle='None', marker='s', color='red')
+        ax.plot(x_values, y_values, linestyle='None', marker='s', color='red', markersize=10)
     elif flag == 'sba':
-        ax.plot(x_values, y_values, linestyle='None', marker='D', color='orange')
+        ax.plot(x_values, y_values, linestyle='None', marker='D', color='orange', markersize=8)
 
 
 def format_plots(ax, size, flag):
@@ -230,9 +230,9 @@ def format_plots(ax, size, flag):
     plt.setp(ax.get_yticklabels(), fontsize=22, fontstyle='oblique')
     lines = ax.lines
     if flag == 'max_load':
-        ax.legend((lines[0], lines[1], lines[2]), ('flood', 'ahbp', 'sba'), 'lower right')
+        ax.legend((lines[0], lines[1], lines[2]), ('flood', 'ahbp', 'sba'), 'lower right', prop={'size':24})
     elif flag == 'retransmission' or flag == 'messages':
-        ax.legend((lines[0], lines[1], lines[2]), ('flood', 'ahbp', 'sba'), 'upper left')
+        ax.legend((lines[0], lines[1], lines[2]), ('flood', 'ahbp', 'sba'), 'upper left', prop={'size':24})
 
 def format_figure(fig, flag):
     """

@@ -589,10 +589,10 @@ def create_plots():
     Plot a graph with possibility to arrange and save it manually
     """
     # max_size = 1
-    samples = 50
+    samples = 100
 
     # x_lst = [i for i in range(2, max_size+1)]
-    x_lst = [50]
+    x_lst = [3]
 
     fig3 = plt.figure('Max buffer-length')
     fig2 = plt.figure('Messages sent')
@@ -672,7 +672,7 @@ def create_plots():
         Graph.format_plots(ax3, size, 'max_load')
 
     # add axis notations and stuff
-    Graph.format_figure(fig1, 'retranmission')
+    Graph.format_figure(fig1, 'retransmission')
     Graph.format_figure(fig2, 'messages')
     Graph.format_figure(fig3, 'max_load')
 

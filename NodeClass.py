@@ -149,7 +149,7 @@ class Node(object):
             counter = 0
             for neighbor in neighbors:
                 if neighbor != item.last_node:
-                    counter += 1
+                    counter = 1
                     # deepcopy guarantees everything is copied
                     neighbor.receive_buffer.append(copy.deepcopy(item))
                     neighbor.receive_buffer[-1].last_node = self
@@ -157,7 +157,7 @@ class Node(object):
                     # which are not the source of the message
                     if item.origin != self.ID + 1:
                         self.sender = True
-            if counter != 0:
+            if counter == 1:
                 # append 5 for each message in the sending_buffer
                 self.message_counter.append(5)
 
